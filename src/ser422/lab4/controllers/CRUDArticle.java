@@ -32,7 +32,6 @@ public class CRUDArticle extends HttpServlet {
 		// TODO Auto-generated method stub
 		PrintWriter out= response.getWriter();
 		out.println("Hello!");
-		request.getRequestDispatcher(null);
 	}
 
 	/**
