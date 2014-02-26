@@ -14,7 +14,8 @@
 //TODO Display Comments
 //TODO Display Comment Addition Form
 %>
-
+<jsp:useBean id="theArticle" class=edu.asupoly.ser422.lab4.model.NewsItemBean"></jsp:useBean>
+<jsp:getProperty property="itemStory" name="theArticle"/>
 
 </body>
 </html>
