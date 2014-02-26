@@ -4,24 +4,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>I have No IDEA News</title>
 </head>
-<h2>NEW News</h2>
-<p>NEW news is a news resource about NEW stuff.</p>
-<p>NEW news is a fictional organization managing fictional news
-	items for a non-fictional web programming class.</p>
-<pre>
-This is an hardcoded page. In fact this page should display all 
-dynamically (whether you are logged in
-or not, and whether you want
-news item titles, with the proper links in the bottom nav generated
-to create a new news story if you are a reporter).
-</pre>
-<br />
+<jsp:include page="./NewsArticle/NewsArticle.jsp"></jsp:include>
+<jsp:include page="./login.html"></jsp:include> 
 <table border="0">
 	<tr>
 		<td><a href="./about.html">About</a></td>
-<jsp:include page="./login.html"></jsp:include> 
 		<td><a href="./login.html">Login</a></td>
 	</tr>
 </table>
