@@ -6,7 +6,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>I have No IDEA News</title>
 </head>
+<% for (int i=0;i<4;i++){ %>
 <jsp:include page="./NewsArticle/NewsArticle.jsp"></jsp:include>
+<%} %>
 <jsp:include page="./login.html"></jsp:include> 
 <table border="0">
 	<tr>
