@@ -18,6 +18,14 @@ public class NewsItemBean {
 		this(nextId++, title, story, rid);
 	}
 	
+	public NewsItemBean(){
+		itemTitle = "The Title";
+		itemStory = "Story now incoming";
+		itemDate = null;
+		reporterID = "ADAM";
+		comments = null;
+	}
+	
 	// This constructor is used for an existing, i.e. coming from datastore
 	public NewsItemBean(int id, String title, String story, String rid) {
 		itemTitle = title;
