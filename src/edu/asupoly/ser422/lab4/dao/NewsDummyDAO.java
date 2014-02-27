@@ -7,7 +7,8 @@ public class NewsDummyDAO implements INewsDAO {
 
 	@Override
 	public NewsItemBean[] getNews() {
-		NewsItemBean[] news = new NewsItemBean[10];
+
+		NewsItemBean[] news= new NewsItemBean[10];
 		for (int i = 0; i < news.length; i++) {
 			news[i] = new NewsItemBean(i, "title"+i, "story"+i, "reporter"+i%3);
 		}
@@ -21,13 +22,25 @@ public class NewsDummyDAO implements INewsDAO {
 
 	@Override
 	public UserBean getUser(String userid) {
-		if (Math.random() < 0.1) return null;
-		
+		if (Math.random() < 0.1)
+		{
+			return null;
+		}
+
 		UserBean.Role role = null;
 		int choice = (int)Math.floor(Math.random()*3);
-		if (choice == 0) role = UserBean.Role.GUEST;
-		else if (choice == 1) role = UserBean.Role.SUBSCRIBER;
-		else if (choice == 2) role = UserBean.Role.REPORTER;
+		if (choice == 0)
+		{
+			role = UserBean.Role.GUEST;
+		}
+		else if (choice == 1)
+		{
+			role = UserBean.Role.SUBSCRIBER;
+		}
+		else if (choice == 2)
+		{
+			role = UserBean.Role.REPORTER;
+		}
 		return new UserBean(userid, userid, role);
 	}
 

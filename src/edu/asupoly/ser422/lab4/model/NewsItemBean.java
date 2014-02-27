@@ -11,7 +11,7 @@ public class NewsItemBean {
 	private String itemStory;
 	private Date itemDate;
 	private final String reporterId;
-	private ArrayList<CommentBean> comments = new ArrayList<CommentBean>();
+	private final ArrayList<CommentBean> comments = new ArrayList<CommentBean>();
 
 	// This constructor is used for a new news item
 	public NewsItemBean(String title, String story, String rid) {
@@ -23,7 +23,7 @@ public class NewsItemBean {
 		this.itemStory = "Story now incoming";
 		this.itemDate = null;
 		this.reporterId= "ADAM";
-		this.comments = null;
+		this.comments.add(new CommentBean(this, this.reporterId, "This Comment"));
 	}
 
 	// This constructor is used for an existing, i.e. coming from datastore
@@ -33,6 +33,7 @@ public class NewsItemBean {
 		this.reporterId = rid;
 		this.itemDate = new Date();
 		this.itemId = id;
+		this.comments.add(new CommentBean(this, "ADAM", "This Comment"));
 	}
 
 	public int getItemId() {
