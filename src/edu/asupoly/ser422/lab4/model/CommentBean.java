@@ -5,7 +5,9 @@ package edu.asupoly.ser422.lab4.model;
  * @author kevinagary
  *
  */
-public class CommentBean {
+public class CommentBean implements java.io.Serializable {
+	private static final long serialVersionUID = 8241629811258814033L;
+	
 	private String userId;
 	private String comment;
 	private int newsItemId;
@@ -13,8 +15,14 @@ public class CommentBean {
 	public CommentBean(NewsItemBean nib, String userid, String comment) {
 		newsItemId = nib.getItemId();
 		nib.addComment(this);
+		this.userId = userid;
+		this.comment = comment;
 	}
-
+	private CommentBean(int nid, String userid, String comment) {
+		newsItemId = nid;
+		this.userId = userid;
+		this.comment = comment;
+	}
 	public String getUserId() {
 		return userId;
 	}
