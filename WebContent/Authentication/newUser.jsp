@@ -5,7 +5,10 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<form method="post" action="./">
+<%if (request.getAttribute("msg")!=null) {%>
+<%=request.getAttribute("msg")%>
+<%} %>
+	<form method="post">
 		What role should this user take?: 
 		<select>
 			<option value="subscriber">Subscriber</option>
