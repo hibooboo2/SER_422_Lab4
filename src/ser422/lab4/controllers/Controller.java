@@ -2,13 +2,16 @@
 package ser422.lab4.controllers;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ser422.lab4.BizLogic.BizLogic;
+import edu.asupoly.ser422.lab4.dao.INewsDAO;
 import edu.asupoly.ser422.lab4.dao.NewsDAOFactory;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
 
@@ -20,6 +23,8 @@ public class Controller extends HttpServlet
 
 	private static final long	serialVersionUID	= 1L;
 
+	private static INewsDAO		controllerDOA;
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -28,6 +33,17 @@ public class Controller extends HttpServlet
 
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	@Override
+	public void init(ServletConfig config) throws ServletException
+	{
+
+		super.init(config);
+		controllerDOA= NewsDAOFactory.getTheDAO();
 	}
 
 	/**
@@ -64,17 +80,28 @@ public class Controller extends HttpServlet
 				}
 				request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
 				break;
-			case "news":
-				NewsItemBean[] stories= NewsDAOFactory.getTheDAO().getNews();
-				request.setAttribute("articlesNumber", stories.length);
-				request.setAttribute("stories", stories);
-				for (int i= 0; i < stories.length; i++)
-				{
-					request.setAttribute("article" + i, stories[i]);
-				}
-				request.getRequestDispatcher("home.jsp").forward(request, response);
+			case "login":
+				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
 				break;
+			case "news":
+				if (controllerDOA.getNews() != null)
+				{
+					NewsItemBean[] stories= controllerDOA.getNews();
+					request.setAttribute("articlesNumber", stories.length);
+					request.setAttribute("stories", stories);
+					for (int i= 0; i < stories.length; i++)
+					{
+						request.setAttribute("article" + i, stories[i]);
+					}
+					request.getRequestDispatcher("home.jsp").forward(request, response);
+					break;
+				}
+				else
+				{
+					break;
+				}
 			default:
+				response.getWriter().println("ITS BROKEN! In the get on controller!");
 				break;
 		}
 	}
@@ -86,8 +113,44 @@ public class Controller extends HttpServlet
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 
-		// TODO Auto-generated method stub
-		PrintWriter out= response.getWriter();
-		out.println("Hello!");
+		String action= null;
+		if (request.getParameter("action") != null)
+		{
+			action= request.getParameter("action");
+		}
+		else
+		{
+			action= "none";
+		}
+		switch (action)
+		{
+			case "newUser":
+				request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
+				break;
+			case "makeUser":
+				// BizLogic.makeUser();
+				break;
+			case "login":
+				switch (BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd")))
+				{
+					case "nullFields":
+						request.setAttribute("msg", "Must have a Username and Password");
+						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
+						break;
+					case "fieldsNotEqual":
+						break;
+					case "noUser":
+						break;
+					case "loggedIn":
+						break;
+					default:
+						response.getWriter().println("ITS BROKEN! In the Login ON POST!");
+						break;
+				}
+				break;
+			default:
+				response.getWriter().println("ITS BROKEN! IN THE MAIN SWITCH ON CONTROLLER POST!");
+				break;
+		}
 	}
 }

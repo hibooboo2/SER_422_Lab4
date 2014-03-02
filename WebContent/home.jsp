@@ -19,13 +19,7 @@
 		request.getRequestDispatcher("NewsArticle/summary.jsp").include(request, response);
 	}
 %>
-
-<table border="0">
-	<tr>
-		<td><a href="./about.html">About</a></td>
-		<td><a href="./login.html">Login</a></td>
-	</tr>
-</table>
+<a href="?action=login">Login</a>
 </body>
 </html>
 <!-- Diplay Articles.Based on Permissions Per role. Edit Delete Links Based on permissions.  

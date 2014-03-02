@@ -11,7 +11,11 @@ public class NewsDefaultDAO implements INewsDAO {
 	protected Hashtable<String, UserBean>       __users;
 	protected Hashtable<String, CommentBean>	 __comments;  // key is the news item id
 	
-	NewsDefaultDAO() {}
+	NewsDefaultDAO() {
+		__news  = new Hashtable<Integer, NewsItemBean>();
+		__users = new Hashtable<String, UserBean>();
+		__comments = new Hashtable<String, CommentBean>();
+	}
 	
 	@Override
 	public NewsItemBean[] getNews() {
