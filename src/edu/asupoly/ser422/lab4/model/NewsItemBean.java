@@ -7,54 +7,64 @@ public class NewsItemBean implements java.io.Serializable {
 	private static final long serialVersionUID = 4760114651123862127L;
 
 	private static int nextId = 1;
-	
-	private int itemId;
+
+	private final int itemId;
 	private String itemTitle;
 	private String itemStory;
 	private Date itemDate;
-	private String reporterId;
-	private ArrayList<CommentBean> comments = new ArrayList<CommentBean>();
-	
+	private final String reporterId;
+
+	private boolean							isPublic			= true;
+
+	private final ArrayList<CommentBean> comments = new ArrayList<CommentBean>();
+
 	// This constructor is used for a new news item
 	public NewsItemBean(String title, String story, String rid) {
 		this(nextId++, title, story, rid);
 	}
-	
-	// This constructor is used for an existing, i.e. coming from datastore
-	public NewsItemBean(int id, String title, String story, String rid) {
-		itemTitle = title;
-		itemStory = story;
-		reporterId = rid;
-		itemDate = new Date();
-		itemId = id;
+
+	public NewsItemBean(String title, String story, String rid, boolean isPublic)
+	{
+		this(nextId++, title, story, rid);
+		this.setPublic(isPublic);
 	}
-	
+
+	// This constructor is used for an existing, i.e. coming from datastore
+	public NewsItemBean(int id, String title, String story, String rid)
+	{
+		this.itemTitle = title;
+		this.itemStory = story;
+		this.reporterId = rid;
+		this.itemDate = new Date();
+		this.itemId = id;
+	}
+
 	public int getItemId() {
-		return itemId;
+		return this.itemId;
 	}
 	public String getReporterId() {
-		return reporterId;
+		return this.reporterId;
 	}
 
 	public void setItemTitle(String itemTitle, String rid) {
-		if (rid.equals(reporterId)) {
+		if (rid.equals(this.reporterId)) {
 			this.itemTitle = itemTitle;
 		}
 	}
 
 	public String getItemTitle() {
-		return itemTitle;
+		return this.itemTitle;
 	}
 
 	public void setItemStory(String itemStory, String rid) {
-		if (rid.equals(reporterId)) {
+		if (rid.equals(this.reporterId)) {
 			this.itemStory = itemStory;
-			setItemDate(new Date());
+			this.setItemDate(new Date());
 		}
 	}
 
 	public String getItemStory() {
-		return itemStory;
+		return this.itemStory;
 	}
 
 	private void setItemDate(Date itemDate) {
@@ -62,13 +72,32 @@ public class NewsItemBean implements java.io.Serializable {
 	}
 
 	public Date getItemDate() {
-		return itemDate;
+		return this.itemDate;
 	}
-	
+
 	public void addComment(CommentBean cb) {
-		comments.add(cb);
+		this.comments.add(cb);
 	}
 	public CommentBean[] getComments() {
-		return comments.toArray(new CommentBean[0]);
+		return this.comments.toArray(new CommentBean[0]);
+	}
+
+	/**
+	 * @return the isPublic
+	 */
+	public boolean isPublic()
+	{
+
+		return this.isPublic;
+	}
+
+	/**
+	 * @param isPublic
+	 *            the isPublic to set
+	 */
+	public void setPublic(boolean isPublic)
+	{
+
+		this.isPublic= isPublic;
 	}
 }

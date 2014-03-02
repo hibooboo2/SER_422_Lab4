@@ -32,7 +32,7 @@ public class BizLogic
 			}
 			else
 			{
-				action= "login$" + user.toString();
+				action= "userFound";
 			}
 		}
 		return action;
@@ -40,13 +40,25 @@ public class BizLogic
 
 	/**
 	 * @param userName
+	 * @param role
 	 * @param passWord
 	 */
-	public static boolean makeUser(String userName, String passWord, INewsDAO controllerDOA)
+	public static boolean makeUser(String userName, String role, INewsDAO controllerDOA)
 	{
 
-		return controllerDOA.createUser(new UserBean(userName, passWord, Role.GUEST));
+		Role userRole= null;
+		switch (role)
+		{
+			case "subscriber":
+				userRole= Role.SUBSCRIBER;
+				break;
+			case "reporter":
+				userRole= Role.REPORTER;
+				break;
+		}
+		return controllerDOA.createUser(new UserBean(userName, userName, userRole));
 	}
+
 	{
 	}
 
@@ -61,5 +73,36 @@ public class BizLogic
 
 		NewsItemBean newsItem= controllerDAO.getNewsItem(newsItemId);
 		newsItem.addComment(new CommentBean(newsItem, userId, comment));
+	}
+
+	/**
+	 * @param userID
+	 * @param controllerDAO
+	 * @return
+	 */
+	public static UserBean getUser(String userID, INewsDAO controllerDAO)
+	{
+
+		return controllerDAO.getUser(userID);
+	}
+
+	/**
+	 * @param articleID
+	 * @param controllerDAO
+	 */
+	public static boolean deleteArticle(String articleID, INewsDAO controllerDAO)
+	{
+
+		return controllerDAO.deleteNewsItem(Integer.parseInt(articleID));
+	}
+
+	/**
+	 * @param parameter
+	 * @param parameter2
+	 * @param controllerDAO
+	 */
+	public static boolean createNewsStory(NewsItemBean newArticle, INewsDAO controllerDAO)
+	{
+		return controllerDAO.createNewsItem(newArticle);
 	}
 }

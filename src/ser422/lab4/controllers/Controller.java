@@ -6,21 +6,25 @@ import java.io.IOException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.connector.Response;
+
 import ser422.lab4.BizLogic.BizLogic;
 import edu.asupoly.ser422.lab4.dao.INewsDAO;
-import edu.asupoly.ser422.lab4.dao.NewsDummyDAO;
+import edu.asupoly.ser422.lab4.dao.NewsDAOFactory;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
+import edu.asupoly.ser422.lab4.model.UserBean;
+import edu.asupoly.ser422.lab4.model.UserBean.Role;
 
 /**
  * Servlet implementation class CRUDArticle
  */
 public class Controller extends HttpServlet
 {
+
 	private static final long	serialVersionUID	= 1L;
 
 	private static INewsDAO		controllerDAO;
@@ -43,8 +47,23 @@ public class Controller extends HttpServlet
 	{
 
 		super.init(config);
-		// controllerDOA= NewsDAOFactory.getTheDAO();
-		controllerDAO= new NewsDummyDAO();
+		controllerDAO= NewsDAOFactory.getTheDAO();
+		NewsItemBean[] news= new NewsItemBean[10];
+		for (int i= 0; i < news.length; i++)
+		{
+			boolean isPublic= true;
+			if (i % 2 == 0)
+			{
+				isPublic= false;
+			}
+			news[i]=
+					new NewsItemBean(
+							"Lorem Ipsum Stories : " + i,
+							"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed interdum cursus nisi, non tempor orci venenatis nec. Integer posuere nulla non est dapibus, a consectetur neque aliquet. Curabitur vitae facilisis est, in malesuada ligula. Cras tincidunt, libero ac sollicitudin ultrices, tortor enim vestibulum sapien, sed suscipit metus lacus interdum enim. Phasellus posuere est id tristique euismod. Vestibulum eleifend vestibulum leo in aliquet. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas id mauris pretium, semper massa vitae, sagittis neque. Morbi a posuere mi."
+									+ i, "reporter", isPublic);
+			controllerDAO.createNewsItem(news[i]);
+		}
+		// controllerDAO= new NewsDummyDAO();
 	}
 
 	/**
@@ -60,74 +79,79 @@ public class Controller extends HttpServlet
 		// Set response attribute with that array.
 		// request dispatcher forward to the view with our response.
 		String action= null;
-		if ((request.getParameter("action") != null) && request.getSession(false) != null)
-		{
-			request.getSession(false).setAttribute("currentAction", request.getParameter("action"));
-		}
-		else if (request.getParameter("action") != null && request.getSession(false) == null)
-		{
-			request.getSession();
-			request.getSession(false).setAttribute("currentAction", request.getParameter("action"));
-		}
-		else if (request.getParameter("action") == null)
-		{
-			action= "news";
-		}
 		if (request.getSession(false) == null)
 		{
-			request.getSession(true);
-			request.getRequestDispatcher("./").forward(request, response);
+			request.getSession();
+			request.getSession().setAttribute("role", Role.GUEST.toString());
+			request.getSession().setAttribute("user", "none");
+			request.getSession().setMaxInactiveInterval(10);
+		}
+		if ((request.getParameter("action") != null))
+		{
+			action= (request.getParameter("action"));
 		}
 		else
 		{
-			if (request.getSession(false) != null && request.getSession(false).getAttribute("currentAction") != null && action == null)
-			{
-				action= (String) request.getSession(false).getAttribute("currentAction");
-			}
-			switch (action)
-			{
-				case "viewArticle":
-					NewsItemBean article= controllerDAO.getNewsItem(Integer.parseInt(request.getParameter("articleID")));
-					request.setAttribute("article", article);
-					request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
-					for (int i= 0; i < article.getComments().length; i++)
-					{
-						request.setAttribute("comment", article.getComments()[i]);
-						request.getRequestDispatcher("/Comments/view.jsp").include(request, response);
-					}
-					request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
+			action= "news";
+		}
+		if (request.getSession(false) != null && request.getSession(false).getAttribute("authenticatedAction") != null)
+		{
+			action= (String) request.getSession(false).getAttribute("authenticatedAction");
+		}
+		switch (action)
+		{
+			case "viewArticle":
+				NewsItemBean article= controllerDAO.getNewsItem(Integer.parseInt(request.getParameter("articleID")));
+				request.setAttribute("article", article);
+				request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
+				for (int i= 0; i < article.getComments().length; i++)
+				{
+					request.setAttribute("comment", article.getComments()[i]);
+					request.getRequestDispatcher("/Comments/view.jsp").include(request, response);
+				}
+				request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
+				break;
+			case "login":
+				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
+				break;
+			case "logout":
+				request.getSession().invalidate();
+				response.sendRedirect("./");
+				break;
+			case "DeleteArticle":
+				response.getWriter().println("Implement deleteArticle");
+				break;
+			case "addComment":
+				response.getWriter().println("Implement addComment");
+				break;
+			case "EditNews":
+				response.getWriter().println("Implement EditNews");
+				break;
+			case "createNewsStory":
+				request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").forward(request, response);
+				break;
+			case "NewsArticle":
+				response.getWriter().println("Implement NewsArticle");
+				break;
+			case "createUser":
+				response.getWriter().println("Implement createUser");
+				break;
+			case "news":
+				if (controllerDAO.getNews() != null)
+				{
+					NewsItemBean[] stories= controllerDAO.getNews();
+					request.setAttribute("articlesNumber", stories.length);
+					request.setAttribute("stories", stories);
+					request.getRequestDispatcher("home.jsp").forward(request, response);
 					break;
-				case "login":
-					request.getSession(false).setAttribute("currentAction", "login");
-					request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
+				}
+				else
+				{
 					break;
-				case "DeleteArticle":
-					response.getWriter().println("Implement deleteArticle");
-					break;
-				case "favArticle":
-					response.getWriter().println("Implement favArticle");
-					break;
-				case "news":
-					if (controllerDAO.getNews() != null)
-					{
-						NewsItemBean[] stories= controllerDAO.getNews();
-						request.setAttribute("articlesNumber", stories.length);
-						request.setAttribute("stories", stories);
-						for (int i= 0; i < stories.length; i++)
-						{
-							request.setAttribute("article" + i, stories[i]);
-						}
-						request.getRequestDispatcher("home.jsp").forward(request, response);
-						break;
-					}
-					else
-					{
-						break;
-					}
-				default:
-					response.getWriter().println("ITS BROKEN! In the get on controller!");
-					break;
-			}
+				}
+			default:
+				response.sendError(Response.SC_BAD_REQUEST);
+				break;
 		}
 	}
 
@@ -138,75 +162,89 @@ public class Controller extends HttpServlet
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 
-		if (request.getSession(false) == null)
+		String action= "";
+		if (request.getParameter("action") != null)
 		{
-			request.getSession(true).setAttribute("currentAction", "login");
-			response.sendRedirect("./Authentication/login.jsp");
+			action= request.getParameter("action");
 		}
-		else if (request.getParameter("action") != null)
+		switch (action)
 		{
-			request.getSession(false).setAttribute("currentAction", request.getParameter("action"));
-		}
-		else
-		{
-			switch ((String) request.getSession(false).getAttribute("currentAction"))
-			{
-				case "newUser":
-					request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-					break;
-				case "makeUser":
-					BizLogic.makeUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
-					request.getSession(false).setAttribute("currentAction", "news");
-					response.addCookie(new Cookie("user", request.getParameter("userid")));
-					response.sendRedirect("./");
-					break;
-				case "addNewsArticle":
-					controllerDAO.createNewsItem(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStroy"),
-							"Test Reporter"));
-					request.setAttribute("msg", "News Story made.");
-					request.getSession(false).setAttribute("currentAction", "news");
-					response.sendRedirect("./");
-					break;
-				case "addComment":
-					BizLogic.addComment(3, "ters", "tesrts", controllerDAO);
-					request.getSession(false).setAttribute("msg", "From adding comment.");
-					request.getSession(false).setAttribute("currentAction", "news");
-					response.sendRedirect("./");
-				case "DeleteArticle":
-					response.getWriter().println("Implement deleteArticle");
-					break;
-				case "favArticle":
-					response.getWriter().println("Implement favArticle");
-					break;
-				case "login":
-					String checkUserResult=
-					BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
-					switch (checkUserResult.split("$")[0])
-					{
-						case "nullFields":
-							request.setAttribute("msg", "Must Have Username and Password entered.");
-							request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-							break;
-						case "fieldMismatch":
-							request.setAttribute("msg", "Username Must equal your Password!");
-							request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-							break;
-						case "noUser":
-							request.setAttribute("msg", "The User: " + request.getParameter("userid") + " does not exist.");
-							request.getSession(false).setAttribute("currentAction", "makeUser");
-							request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-							break;
-						case "login":
-							request.setAttribute("msg", checkUserResult);
-							request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-							response.getWriter().println("ITS BROKEN! In the Login ON POST!");
-							break;
-					}
-					break;
-				default:
-					response.getWriter().println("ITS BROKEN! IN THE MAIN SWITCH ON CONTROLLER POST!");
-					break;
-			}
+			case "newUser":
+				request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
+				break;
+			case "makeUser":
+				BizLogic.makeUser(request.getParameter("userID"), request.getParameter("role"), controllerDAO);
+				request.getSession();
+				request.getSession(false).setAttribute("user", request.getParameter("userID"));
+				request.getSession(false).setAttribute("role", request.getParameter("role"));
+				response.sendRedirect("./");
+				break;
+			case "addNewsArticle":
+				controllerDAO.createNewsItem(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStroy"),
+						"Test Reporter"));
+				request.setAttribute("msg", "News Story made.");
+				request.getRequestDispatcher("./").include(request, response);
+				break;
+			case "addComment":
+				// TODO: GET this working
+				BizLogic.addComment(Integer.parseInt(request.getParameter("articleID")), "ters", "tesrts", controllerDAO);
+				request.getSession(false).setAttribute("msg", "From adding comment.");
+				request.getSession(false).setAttribute("currentAction", "news");
+				response.getWriter().println("Implement POST ADD COMMENT!");
+				break;
+			case "DeleteArticle":
+				request.setAttribute("msg",
+						"News Article deleted:" + BizLogic.deleteArticle(request.getParameter("articleID"), controllerDAO));
+				// request.getRequestDispatcher("./").include(request, response);
+				response.sendRedirect("./msg=ARTICLE DELETED");
+				break;
+			case "favArticle":
+				response.getWriter().println("Implement favArticle");
+				break;
+			case "EditNews":
+				response.getWriter().println("Implement EditNews");
+				break;
+			case "createNewsStory":
+				BizLogic.createNewsStory(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStory"),
+						(String) request.getSession(false).getAttribute("user"), Boolean.parseBoolean((request.getParameter("isPublic")))),
+						controllerDAO);
+				response.getWriter().println("Created From Post");
+				break;
+			case "NewsArticle":
+				response.getWriter().println("Implement NewsArticle");
+				break;
+			case "login":
+				String checkUserResult=
+						BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
+				switch (checkUserResult)
+				{
+					case "nullFields":
+						request.setAttribute("msg", "Must Have Username and Password entered.");
+						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
+						break;
+					case "fieldMismatch":
+						request.setAttribute("msg", "Username Must equal your Password!");
+						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
+						break;
+					case "noUser":
+						request.setAttribute("msg", "The User: " + request.getParameter("userid") + " does not exist.");
+						request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
+						break;
+					case "userFound":
+						UserBean user= BizLogic.getUser(request.getParameter("userid"), controllerDAO);
+						request.getSession();
+						request.getSession(false).setAttribute("user", user.getUserId());
+						request.getSession(false).setAttribute("role", user.getRole().toString());
+						response.sendRedirect("./");
+						break;
+					default:
+						response.sendError(Response.SC_BAD_REQUEST);
+						break;
+				}
+				break;
+			default:
+				response.sendError(Response.SC_BAD_REQUEST);
+				break;
 		}
 	}
 }

@@ -8,14 +8,16 @@
 <%if (request.getAttribute("msg")!=null) {%>
 <%=request.getAttribute("msg")%>
 <%} %>
-	<form method="post" action="./?action=newUser">
+	<form method="post" action="./?action=makeUser">
 		What role should this user take?: 
-		<select>
+		<select name="role">
 			<option value="subscriber">Subscriber</option>
 			<option value="reporter">Reporter</option>
 		</select> 
+		<input type="hidden" name="userID" value="<%= request.getParameter("userid")%>"/>
 		<input type="submit" value="Create User" /> 
 		<input type="submit" value="Cancel" />
 	</form>
+	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>

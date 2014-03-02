@@ -8,6 +8,7 @@
 <title>I have No IDEA News</title>
 </head>
 <body>
+	<jsp:include page="/goHome.jsp"></jsp:include>
 	<%@ page import="edu.asupoly.ser422.lab4.dao.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
@@ -19,11 +20,13 @@
 			String attribute= attris.nextElement();
 	%>
 	<%=attribute%>
+	<%=":"%>
 	<%
 		if (request.getSession() != null && request.getSession().getAttribute(attribute) != null)
 			{
 	%>
 	<%=request.getSession().getAttribute(attribute)%>
+	<%="  "%>
 	<%
 		}
 		}
@@ -32,11 +35,14 @@
 		NewsItemBean[] stories= (NewsItemBean[]) request.getAttribute("stories");
 		for (int i= 0; i < stories.length; i++)
 		{
+			if(request.getSession().getAttribute("role")!=null){
 			request.setAttribute("article", stories[i]);
 			request.getRequestDispatcher("NewsArticle/summary.jsp").include(request, response);
+			}else{
+				
+			}
 		}
 	%>
-	<a href="?action=login">Login</a>
 </body>
 </html>
 <!-- Diplay Articles.Based on Permissions Per role. Edit Delete Links Based on permissions.  

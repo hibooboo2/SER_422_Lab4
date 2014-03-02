@@ -8,5 +8,4 @@
 	Author:
 	<%=comment.getUserId()%></p>
 <hr />
-
 <!-- REnders NULLLASDLF SDFLJKAJDKL: FJSDAKLJ FFIXETI!!#!@# -->
