@@ -6,13 +6,14 @@ import java.io.IOException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ser422.lab4.BizLogic.BizLogic;
 import edu.asupoly.ser422.lab4.dao.INewsDAO;
-import edu.asupoly.ser422.lab4.dao.NewsDAOFactory;
+import edu.asupoly.ser422.lab4.dao.NewsDummyDAO;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
 
 /**
@@ -20,10 +21,9 @@ import edu.asupoly.ser422.lab4.model.NewsItemBean;
  */
 public class Controller extends HttpServlet
 {
-
 	private static final long	serialVersionUID	= 1L;
 
-	private static INewsDAO		controllerDOA;
+	private static INewsDAO		controllerDAO;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -43,7 +43,8 @@ public class Controller extends HttpServlet
 	{
 
 		super.init(config);
-		controllerDOA= NewsDAOFactory.getTheDAO();
+		// controllerDOA= NewsDAOFactory.getTheDAO();
+		controllerDAO= new NewsDummyDAO();
 	}
 
 	/**
@@ -58,22 +59,35 @@ public class Controller extends HttpServlet
 		// Listing all news items - getNews();
 		// Set response attribute with that array.
 		// request dispatcher forward to the view with our response.
+		String action= null;
 		if ((request.getParameter("action") != null) && request.getSession(false) != null)
 		{
 			request.getSession(false).setAttribute("currentAction", request.getParameter("action"));
 		}
-		if (request.getSession(false) == null)
+		else if (request.getParameter("action") != null && request.getSession(false) == null)
 		{
 			request.getSession();
-			request.getSession(false).setAttribute("currentAction", "news");
-			response.sendRedirect("./");
+			request.getSession(false).setAttribute("currentAction", request.getParameter("action"));
+		}
+		else if (request.getParameter("action") == null)
+		{
+			action= "news";
+		}
+		if (request.getSession(false) == null)
+		{
+			request.getSession(true);
+			request.getRequestDispatcher("./").forward(request, response);
 		}
 		else
 		{
-			switch ((String) request.getSession(false).getAttribute("currentAction"))
+			if (request.getSession(false) != null && request.getSession(false).getAttribute("currentAction") != null && action == null)
+			{
+				action= (String) request.getSession(false).getAttribute("currentAction");
+			}
+			switch (action)
 			{
 				case "viewArticle":
-					NewsItemBean article= NewsDAOFactory.getTheDAO().getNewsItem(Integer.parseInt(request.getParameter("articleID")));
+					NewsItemBean article= controllerDAO.getNewsItem(Integer.parseInt(request.getParameter("articleID")));
 					request.setAttribute("article", article);
 					request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
 					for (int i= 0; i < article.getComments().length; i++)
@@ -84,12 +98,19 @@ public class Controller extends HttpServlet
 					request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
 					break;
 				case "login":
+					request.getSession(false).setAttribute("currentAction", "login");
 					request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
 					break;
+				case "DeleteArticle":
+					response.getWriter().println("Implement deleteArticle");
+					break;
+				case "favArticle":
+					response.getWriter().println("Implement favArticle");
+					break;
 				case "news":
-					if (controllerDOA.getNews() != null)
+					if (controllerDAO.getNews() != null)
 					{
-						NewsItemBean[] stories= controllerDOA.getNews();
+						NewsItemBean[] stories= controllerDAO.getNews();
 						request.setAttribute("articlesNumber", stories.length);
 						request.setAttribute("stories", stories);
 						for (int i= 0; i < stories.length; i++)
@@ -120,7 +141,11 @@ public class Controller extends HttpServlet
 		if (request.getSession(false) == null)
 		{
 			request.getSession(true).setAttribute("currentAction", "login");
-			response.sendRedirect("./");
+			response.sendRedirect("./Authentication/login.jsp");
+		}
+		else if (request.getParameter("action") != null)
+		{
+			request.getSession(false).setAttribute("currentAction", request.getParameter("action"));
 		}
 		else
 		{
@@ -130,13 +155,32 @@ public class Controller extends HttpServlet
 					request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
 					break;
 				case "makeUser":
-					BizLogic.makeUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDOA);
+					BizLogic.makeUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
 					request.getSession(false).setAttribute("currentAction", "news");
-					request.getSession(false).setAttribute("user", request.getParameter("userid"));
+					response.addCookie(new Cookie("user", request.getParameter("userid")));
 					response.sendRedirect("./");
 					break;
+				case "addNewsArticle":
+					controllerDAO.createNewsItem(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStroy"),
+							"Test Reporter"));
+					request.setAttribute("msg", "News Story made.");
+					request.getSession(false).setAttribute("currentAction", "news");
+					response.sendRedirect("./");
+					break;
+				case "addComment":
+					BizLogic.addComment(3, "ters", "tesrts", controllerDAO);
+					request.getSession(false).setAttribute("msg", "From adding comment.");
+					request.getSession(false).setAttribute("currentAction", "news");
+					response.sendRedirect("./");
+				case "DeleteArticle":
+					response.getWriter().println("Implement deleteArticle");
+					break;
+				case "favArticle":
+					response.getWriter().println("Implement favArticle");
+					break;
 				case "login":
-					String checkUserResult= BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd"));
+					String checkUserResult=
+					BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
 					switch (checkUserResult.split("$")[0])
 					{
 						case "nullFields":
@@ -155,7 +199,7 @@ public class Controller extends HttpServlet
 						case "login":
 							request.setAttribute("msg", checkUserResult);
 							request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-							// response.getWriter().println("ITS BROKEN! In the Login ON POST!");
+							response.getWriter().println("ITS BROKEN! In the Login ON POST!");
 							break;
 					}
 					break;

@@ -8,7 +8,7 @@
 <%if (request.getAttribute("msg")!=null) {%>
 <%=request.getAttribute("msg")%>
 <%} %>
-	<form method="post">
+	<form method="post" action="./?action=newUser">
 		What role should this user take?: 
 		<select>
 			<option value="subscriber">Subscriber</option>

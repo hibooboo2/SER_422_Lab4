@@ -7,8 +7,11 @@
 <title>Insert title here</title>
 </head>
 <body>
-<form action="post" autocomplete="on">
+<form action="./?action=addNewsArticle" method="post">
+<input type="text" name="newsTitle" id="titleField"></input>
+<textarea name="newsStroy" id="storyField"></textarea>
+<% request.getSession(false).setAttribute("currentAction", "addNewsArticle"); %>
+<input type="submit" value="Publish News Story">
 </form>
-
 </body>
 </html>

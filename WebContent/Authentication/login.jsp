@@ -4,7 +4,7 @@
 <%if (request.getAttribute("msg")!=null) {%>
 <%=request.getAttribute("msg")%>
 <%} %>
-<form method="post" action="./" autocomplete="on">
+<form method="post" action="./?action=login" autocomplete="on">
 User ID: <input type="text" name="userid" size="25"/>
 Password: <input type="password" name="passwd" size="25"/><br/>
 <p></p>

@@ -8,5 +8,21 @@
 	//TODO Display Comment Addition Form
 	NewsItemBean article= (NewsItemBean) request.getAttribute("article");
 %>
-<h3><a href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a><input value="Delete" type="submit" /> <input value="Favorite" type="submit" /></h3> 
+<table>
+	<tr>
+		<td><a
+			href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a></td>
+		<td>
+			<form method="get" action="./?action=DeleteArticle">
+				<input value="Delete" type="submit" />
+			</form>
+		</td>
+		<td>
+			<form method="get" action="./?action=favArticle">
+				<input value="Favorite" type="submit" />
+			</form>
+		</td>
+	</tr>
+</table>
+
 <!-- Display Comments Here -->
