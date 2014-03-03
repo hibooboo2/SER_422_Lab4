@@ -15,20 +15,27 @@
 	width: 40px;
 }
 </style>
+<%
+	if (request.getSession(false) == null)
+	{
+		request.getSession();
+		request.getSession().setAttribute("role", "Guest");
+		request.getSession().setAttribute("user", "none");
+	}
+%>
 </head>
 <%
- 	if (((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter"))
- 	{
- %>
+	if (((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter"))
+	{
+%>
 <div id="reporterMenu">
 	<a href="?action=createNewsStory"><img src="http://goo.gl/pXWTGl"
-		alt="Create New News Article" height="40" width="40"> </a>
-		<br>
-		Create Article
+		alt="Create New News Article" height="40" width="40"> </a> <br>
+	Create Article
 </div>
 <%
- 	}
- %>
+	}
+%>
 <div id="homeButton">
 	<table>
 		<tr>

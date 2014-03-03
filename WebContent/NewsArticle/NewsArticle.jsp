@@ -25,14 +25,6 @@
 	<!-- Display Comments Here -->
 	<hr />
 	<h3>Comments:</h3>
-	<%
-		CommentBean[] comments= article.getComments();
-		for (int i= 0; i < comments.length; i++)
-		{
-			request.setAttribute("comment", comments[i]);
-			request.getRequestDispatcher("Comments/view.jsp").include(request, response);
-		}
-	%>
 	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>

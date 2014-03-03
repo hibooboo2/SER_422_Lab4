@@ -35,12 +35,8 @@
 		NewsItemBean[] stories= (NewsItemBean[]) request.getAttribute("stories");
 		for (int i= 0; i < stories.length; i++)
 		{
-			if(request.getSession().getAttribute("role")!=null){
 			request.setAttribute("article", stories[i]);
 			request.getRequestDispatcher("NewsArticle/summary.jsp").include(request, response);
-			}else{
-				
-			}
 		}
 	%>
 </body>

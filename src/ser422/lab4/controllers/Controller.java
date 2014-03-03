@@ -84,7 +84,7 @@ public class Controller extends HttpServlet
 			request.getSession();
 			request.getSession().setAttribute("role", Role.GUEST.toString());
 			request.getSession().setAttribute("user", "none");
-			request.getSession().setMaxInactiveInterval(10);
+			request.getSession().setMaxInactiveInterval(1800);
 		}
 		if ((request.getParameter("action") != null))
 		{
@@ -118,23 +118,11 @@ public class Controller extends HttpServlet
 				request.getSession().invalidate();
 				response.sendRedirect("./");
 				break;
-			case "DeleteArticle":
-				response.getWriter().println("Implement deleteArticle");
-				break;
-			case "addComment":
-				response.getWriter().println("Implement addComment");
-				break;
 			case "EditNews":
 				response.getWriter().println("Implement EditNews");
 				break;
 			case "createNewsStory":
 				request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").forward(request, response);
-				break;
-			case "NewsArticle":
-				response.getWriter().println("Implement NewsArticle");
-				break;
-			case "createUser":
-				response.getWriter().println("Implement createUser");
 				break;
 			case "news":
 				if (controllerDAO.getNews() != null)
@@ -179,24 +167,16 @@ public class Controller extends HttpServlet
 				request.getSession(false).setAttribute("role", request.getParameter("role"));
 				response.sendRedirect("./");
 				break;
-			case "addNewsArticle":
-				controllerDAO.createNewsItem(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStroy"),
-						"Test Reporter"));
-				request.setAttribute("msg", "News Story made.");
-				request.getRequestDispatcher("./").include(request, response);
-				break;
 			case "addComment":
 				// TODO: GET this working
-				BizLogic.addComment(Integer.parseInt(request.getParameter("articleID")), "ters", "tesrts", controllerDAO);
-				request.getSession(false).setAttribute("msg", "From adding comment.");
-				request.getSession(false).setAttribute("currentAction", "news");
-				response.getWriter().println("Implement POST ADD COMMENT!");
+				BizLogic.addComment(Integer.parseInt(request.getParameter("articleID")),
+						(String) request.getSession(false).getAttribute("user"), request.getParameter("comment"), controllerDAO);
+				response.sendRedirect("?" + request.getParameter("from"));
 				break;
 			case "DeleteArticle":
 				request.setAttribute("msg",
 						"News Article deleted:" + BizLogic.deleteArticle(request.getParameter("articleID"), controllerDAO));
-				// request.getRequestDispatcher("./").include(request, response);
-				response.sendRedirect("./msg=ARTICLE DELETED");
+				response.sendRedirect("./?msg=ARTICLE DELETED");
 				break;
 			case "favArticle":
 				response.getWriter().println("Implement favArticle");
@@ -208,14 +188,11 @@ public class Controller extends HttpServlet
 				BizLogic.createNewsStory(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStory"),
 						(String) request.getSession(false).getAttribute("user"), Boolean.parseBoolean((request.getParameter("isPublic")))),
 						controllerDAO);
-				response.getWriter().println("Created From Post");
-				break;
-			case "NewsArticle":
-				response.getWriter().println("Implement NewsArticle");
+				response.sendRedirect("./");
 				break;
 			case "login":
 				String checkUserResult=
-						BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
+				BizLogic.checkForUser(request.getParameter("userid"), request.getParameter("passwd"), controllerDAO);
 				switch (checkUserResult)
 				{
 					case "nullFields":
