@@ -6,4 +6,5 @@
 *.ear
 /build
 /.settings
-.project
+*.project
+*.classpath
