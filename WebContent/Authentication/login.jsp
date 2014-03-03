@@ -16,6 +16,5 @@
 		<input type="submit" value="Login" /> <input type="reset"
 			value="Reset" />
 	</form>
-	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>

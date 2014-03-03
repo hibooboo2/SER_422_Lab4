@@ -10,6 +10,5 @@
 	<%
 		//TODO Create User Form, Asks user what role and has cancel option.
 	%>
-	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>

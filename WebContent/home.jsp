@@ -8,7 +8,6 @@
 <title>I have No IDEA News</title>
 </head>
 <body>
-	<jsp:include page="/goHome.jsp"></jsp:include>
 	<%@ page import="edu.asupoly.ser422.lab4.dao.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>

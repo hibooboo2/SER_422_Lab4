@@ -18,6 +18,5 @@
 		<input type="submit" value="Create User" /> 
 		<input type="submit" value="Cancel" />
 	</form>
-	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>

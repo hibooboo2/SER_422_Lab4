@@ -22,6 +22,5 @@
 	<%
 		}
 	%>
-	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>
