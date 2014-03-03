@@ -31,14 +31,20 @@
 		}
 	%>
 	<table>
-	<%
-		NewsItemBean[] stories= (NewsItemBean[]) request.getAttribute("stories");
-		for (int i= 0; i < stories.length; i++)
-		{
-			request.setAttribute("article", stories[i]);
-			request.getRequestDispatcher("NewsArticle/summary.jsp").include(request, response);
-		}
-	%>
+		<tr>
+			<th>Stories</th>
+			<th>Buttons</th>
+		</tr>
+		<%
+			NewsItemBean[] stories= (NewsItemBean[]) request.getAttribute("stories");
+			for (int i= 0; i < stories.length; i++)
+			{
+				request.setAttribute("article", stories[i]);
+		%>
+		<jsp:include page="NewsArticle/summary.jsp"></jsp:include>
+		<%
+			}
+		%>
 	</table>
 </body>
 </html>

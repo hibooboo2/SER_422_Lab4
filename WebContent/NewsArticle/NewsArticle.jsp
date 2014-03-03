@@ -16,8 +16,9 @@
 	<%
 		boolean isReporter= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter");
 		boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
-		boolean didWriteArticle= ((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase(article.getReporterId());
-		if ((article.isPublic() || isSubscriber) || (isReporter && didWriteArticle))
+		boolean isArticleAuthor= ((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase(article.getReporterId());
+		boolean isGuest= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Guest");
+		if ((article.isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
 		{
 	%>
 	<h1><%=article.getItemTitle()%></h1>
@@ -28,6 +29,23 @@
 	<p><%=article.getItemStory()%></p>
 	<hr />
 	<h3>Comments:</h3>
+	<%
+		}
+	%>
+	<%
+		for (int i= 0; i < article.getComments().length; i++)
+		{
+			request.setAttribute("comment", article.getComments()[i]);
+	%>
+	<jsp:include page="/Comments/view.jsp"></jsp:include>
+	<%
+		}
+	%>
+	<%
+		if (!isGuest || (isReporter && isArticleAuthor))
+		{
+	%>
+	<jsp:include page="/Comments/add.jsp"></jsp:include>
 	<%
 		}
 	%>

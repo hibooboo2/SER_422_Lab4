@@ -108,21 +108,11 @@ public class Controller extends HttpServlet
 				NewsItemBean article= controllerDAO.getNewsItem(Integer.parseInt(request.getParameter("articleID")));
 				boolean isReporter= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter");
 				boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
-				boolean isGuest= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Guest");
 				boolean isArticleAuthor= article.getReporterId().equalsIgnoreCase((String) request.getSession(false).getAttribute("user"));
 				if ((article.isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
 				{
 					request.setAttribute("article", article);
 					request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
-					for (int i= 0; i < article.getComments().length; i++)
-					{
-						request.setAttribute("comment", article.getComments()[i]);
-						request.getRequestDispatcher("/Comments/view.jsp").include(request, response);
-					}
-					if (!isGuest || (isReporter && isArticleAuthor))
-					{
-						request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
-					}
 					request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				}
 				break;

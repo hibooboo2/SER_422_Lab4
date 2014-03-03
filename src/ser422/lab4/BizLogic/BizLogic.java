@@ -7,7 +7,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import edu.asupoly.ser422.lab4.dao.INewsDAO;
-import edu.asupoly.ser422.lab4.model.CommentBean;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
 import edu.asupoly.ser422.lab4.model.UserBean;
 import edu.asupoly.ser422.lab4.model.UserBean.Role;
@@ -75,9 +74,7 @@ public class BizLogic
 	 */
 	public static void addComment(int newsItemId, String userId, String comment, INewsDAO controllerDAO)
 	{
-
-		NewsItemBean newsItem= controllerDAO.getNewsItem(newsItemId);
-		newsItem.addComment(new CommentBean(newsItem, userId, comment));
+		controllerDAO.storeComment(newsItemId, userId, comment);
 	}
 
 	/**
