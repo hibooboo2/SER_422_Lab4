@@ -16,6 +16,13 @@
 		//TODO Display Comment Addition Form
 		NewsItemBean article= (NewsItemBean) request.getAttribute("article");
 	%>
+	<%
+		boolean isReporter= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter");
+		boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
+		boolean didWriteArticle= ((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase(article.getReporterId());
+		if ((article.isPublic() || isSubscriber) || (isReporter && didWriteArticle))
+		{
+	%>
 	<h1><%=article.getItemTitle()%></h1>
 	<p>
 		Written by:
@@ -25,6 +32,9 @@
 	<!-- Display Comments Here -->
 	<hr />
 	<h3>Comments:</h3>
+	<%
+		}
+	%>
 	<jsp:include page="/goHome.jsp"></jsp:include>
 </body>
 </html>
