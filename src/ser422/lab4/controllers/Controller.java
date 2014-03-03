@@ -51,11 +51,11 @@ public class Controller extends HttpServlet
 		controllerDAO= NewsDAOFactory.getTheDAO();
 		if (controllerDAO.getClass().toString().equalsIgnoreCase("class edu.asupoly.ser422.lab4.dao.NewsDefaultDAO"))
 		{
-			NewsItemBean[] news= new NewsItemBean[1000];
+			NewsItemBean[] news= new NewsItemBean[10];
 			for (int i= 0; i < news.length; i++)
 			{
 				boolean isPublic= false;
-				if (i % 200 == 0)
+				if (i % 2 == 0)
 				{
 					isPublic= true;
 				}
@@ -154,7 +154,9 @@ public class Controller extends HttpServlet
 						request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						response.getWriter().println(controllerDAO.getClass().toString());
 						break;
-					}else {
+					}
+					else
+					{
 						response.getWriter().println("You have a fav." + cookies.get("favs"));
 						break;
 					}
