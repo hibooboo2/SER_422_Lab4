@@ -17,7 +17,6 @@ import edu.asupoly.ser422.lab4.dao.INewsDAO;
 import edu.asupoly.ser422.lab4.dao.NewsDAOFactory;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
 import edu.asupoly.ser422.lab4.model.UserBean;
-import edu.asupoly.ser422.lab4.model.UserBean.Role;
 
 /**
  * Servlet implementation class CRUDArticle
@@ -82,7 +81,7 @@ public class Controller extends HttpServlet
 		if (request.getSession(false) == null)
 		{
 			request.getSession();
-			request.getSession().setAttribute("role", Role.GUEST.toString());
+			request.getSession().setAttribute("role", "Guest");
 			request.getSession().setAttribute("user", "none");
 			request.getSession().setMaxInactiveInterval(1800);
 		}
@@ -121,12 +120,12 @@ public class Controller extends HttpServlet
 					{
 						request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
 					}
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				}
 				break;
 			case "login":
 				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "logout":
 				request.getSession().invalidate();
@@ -137,7 +136,7 @@ public class Controller extends HttpServlet
 				break;
 			case "createNewsStory":
 				request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "news":
 				if (controllerDAO.getNews() != null)
@@ -146,7 +145,7 @@ public class Controller extends HttpServlet
 					request.setAttribute("articlesNumber", stories.length);
 					request.setAttribute("stories", stories);
 					request.getRequestDispatcher("home.jsp").include(request, response);
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 					break;
 				}
 				else
@@ -175,7 +174,7 @@ public class Controller extends HttpServlet
 		{
 			case "newUser":
 				request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "makeUser":
 				BizLogic.makeUser(request.getParameter("userID"), request.getParameter("role"), controllerDAO);
@@ -215,17 +214,17 @@ public class Controller extends HttpServlet
 					case "nullFields":
 						request.setAttribute("msg", "Must Have Username and Password entered.");
 						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-						request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						break;
 					case "fieldMismatch":
 						request.setAttribute("msg", "Username Must equal your Password!");
 						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-						request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						break;
 					case "noUser":
 						request.setAttribute("msg", "The User: " + request.getParameter("userid") + " does not exist.");
 						request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-						request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						// request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						break;
 					case "userFound":
 						UserBean user= BizLogic.getUser(request.getParameter("userid"), controllerDAO);
