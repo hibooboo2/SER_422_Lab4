@@ -30,6 +30,7 @@
 		}
 		}
 	%>
+	<table>
 	<%
 		NewsItemBean[] stories= (NewsItemBean[]) request.getAttribute("stories");
 		for (int i= 0; i < stories.length; i++)
@@ -38,6 +39,7 @@
 			request.getRequestDispatcher("NewsArticle/summary.jsp").include(request, response);
 		}
 	%>
+	</table>
 </body>
 </html>
 <!-- Diplay Articles.Based on Permissions Per role. Edit Delete Links Based on permissions.  
