@@ -6,11 +6,11 @@
   <!-- set global properties for this build -->
   <property name="tomcat.home" value="D:/HIDERS/Tomcat7"/>
   <property name="src" value="./src" />
-  <property name="lib" location="./lib" />
+  <property name="lib" location="./WebContent/WEB-INF/lib" />
   <property name="res" value="./WebContent" />
   <property name="build" value="./build" />
   <property name="classes" value="./classes" />
-  <property name="appname" value="lab4given" />
+  <property name="appname" value="SER422_Lab4" />
   <property name="war" value="${appname}.war" />
 
    <path id="compile.classpath">
@@ -53,14 +53,14 @@
 	  <copy todir="${build}/WEB-INF/classes" overwrite="yes">
     	<fileset dir="${classes}"/>
       </copy>
-      <copy todir="${build}/WEB-INF" file="web.xml" overwrite="yes"/>
+      <copy todir="${build}/WEB-INF" file="./WebContent/WEB-INF/web.xml" overwrite="yes"/>
       <copy todir="${build}">
       	<fileset dir="${res}" includes="**/*.html,**/*.jsp,**/*.js"/>
       </copy>
       <copy todir="${build}/WEB-INF/lib">
       	<fileset dir="${lib}" includes="*.jar"/>
       </copy>
-      <copy todir="${build}/WEB-INF/classes" file="dao.properties" overwrite="yes"/>
+      <copy todir="${build}/WEB-INF/classes" file="./WebContent/WEB-INF/dao.properties" overwrite="yes"/>
    </target>
    
    <target name="war" depends="build">
