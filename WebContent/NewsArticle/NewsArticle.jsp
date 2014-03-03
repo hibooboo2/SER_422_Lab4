@@ -11,9 +11,6 @@
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%
 		//TODO Implement Favorite (Favorite Button)
-		//TODO Display Article
-		//TODO Display Comments
-		//TODO Display Comment Addition Form
 		NewsItemBean article= (NewsItemBean) request.getAttribute("article");
 	%>
 	<%
@@ -29,7 +26,6 @@
 		<%=article.getReporterId()%></p>
 	<hr />
 	<p><%=article.getItemStory()%></p>
-	<!-- Display Comments Here -->
 	<hr />
 	<h3>Comments:</h3>
 	<%
