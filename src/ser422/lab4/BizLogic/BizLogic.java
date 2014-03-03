@@ -1,6 +1,11 @@
 
 package ser422.lab4.BizLogic;
 
+import java.util.HashMap;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import edu.asupoly.ser422.lab4.dao.INewsDAO;
 import edu.asupoly.ser422.lab4.model.CommentBean;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
@@ -104,5 +109,32 @@ public class BizLogic
 	public static boolean createNewsStory(NewsItemBean newArticle, INewsDAO controllerDAO)
 	{
 		return controllerDAO.createNewsItem(newArticle);
+	}
+
+	/**
+	 * @param newFav
+	 * @param cookies
+	 * @param response
+	 */
+	public static void addFavorite(String newFav, Cookie[] cookies, HttpServletResponse response)
+	{
+
+		HashMap<String,String> cookiesMap= new HashMap<String,String>();
+		if (cookies != null)
+		{
+			for (Cookie coo : cookies)
+			{
+				cookiesMap.put(coo.getName(), coo.getValue());
+				response.addCookie(coo);
+			}
+			cookiesMap.get("favs");
+			Cookie favsCookie= new Cookie("favs", cookiesMap.get("favs") + ":" + newFav);
+			response.addCookie(favsCookie);
+		}
+		else
+		{
+			Cookie favsCookie= new Cookie("favs", newFav);
+			response.addCookie(favsCookie);
+		}
 	}
 }

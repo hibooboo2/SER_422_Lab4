@@ -20,7 +20,7 @@ boolean didWriteArticle= ((String) request.getSession(false).getAttribute("user"
 	<tr>
 		<td><a
 			href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a></td>
-		<% if(didWriteArticle){ %>
+		<% if(didWriteArticle&&isReporter){ %>
 		<td>
 			<form method="post" action="./?action=DeleteArticle">
 				<input value="Delete" type="submit" />

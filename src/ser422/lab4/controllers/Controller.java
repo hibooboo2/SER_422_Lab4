@@ -2,10 +2,12 @@
 package ser422.lab4.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -143,12 +145,19 @@ public class Controller extends HttpServlet
 				if (controllerDAO.getNews() != null)
 				{
 					NewsItemBean[] stories= controllerDAO.getNews();
-					request.setAttribute("articlesNumber", stories.length);
-					request.setAttribute("stories", stories);
-					request.getRequestDispatcher("home.jsp").include(request, response);
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
-					response.getWriter().println(controllerDAO.getClass().toString());
-					break;
+					HashMap<String,String> cookies= this.getCookieMap(request);
+					if (!cookies.containsKey("favs"))
+					{
+						request.setAttribute("articlesNumber", stories.length);
+						request.setAttribute("stories", stories);
+						request.getRequestDispatcher("home.jsp").include(request, response);
+						request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						response.getWriter().println(controllerDAO.getClass().toString());
+						break;
+					}else {
+						response.getWriter().println("You have a fav." + cookies.get("favs"));
+						break;
+					}
 				}
 				else
 				{
@@ -158,6 +167,24 @@ public class Controller extends HttpServlet
 				response.sendError(Response.SC_BAD_REQUEST);
 				break;
 		}
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	private HashMap<String,String> getCookieMap(HttpServletRequest request)
+	{
+
+		HashMap<String,String> cookiesMap= new HashMap<String,String>();
+		if (request.getCookies() != null)
+		{
+			for (Cookie coo : request.getCookies())
+			{
+				cookiesMap.put(coo.getName(), coo.getValue());
+			}
+		}
+		return cookiesMap;
 	}
 
 	/**
@@ -197,7 +224,10 @@ public class Controller extends HttpServlet
 				response.sendRedirect("./?msg=ARTICLE DELETED");
 				break;
 			case "favArticle":
-				response.getWriter().println("Implement favArticle");
+				// TODO: Must do the logic to display the favorite articles separately. Favorites them with cookies right now. Commented
+				// out.
+				// BizLogic.addFavorite(request.getParameter("articleID"), request.getCookies(), response);
+				response.sendRedirect("./");
 				break;
 			case "EditNews":
 				response.getWriter().println("Implement EditNews");
