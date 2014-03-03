@@ -105,9 +105,7 @@ public class Controller extends HttpServlet
 				boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
 				boolean isGuest= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Guest");
 				boolean isArticleAuthor= article.getReporterId().equalsIgnoreCase((String) request.getSession(false).getAttribute("user"));
-				boolean didWriteArticle=
-						((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase(article.getReporterId());
-				if ((article.isPublic() || isSubscriber) || (isReporter && didWriteArticle))
+				if ((article.isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
 				{
 					request.setAttribute("article", article);
 					request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
@@ -120,12 +118,12 @@ public class Controller extends HttpServlet
 					{
 						request.getRequestDispatcher("/Comments/add.jsp").include(request, response);
 					}
-					// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				}
 				break;
 			case "login":
 				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-				// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "logout":
 				request.getSession().invalidate();
@@ -136,7 +134,7 @@ public class Controller extends HttpServlet
 				break;
 			case "createNewsStory":
 				request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").include(request, response);
-				// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "news":
 				if (controllerDAO.getNews() != null)
@@ -145,7 +143,8 @@ public class Controller extends HttpServlet
 					request.setAttribute("articlesNumber", stories.length);
 					request.setAttribute("stories", stories);
 					request.getRequestDispatcher("home.jsp").include(request, response);
-					// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					response.getWriter().println(controllerDAO.getClass().toString());
 					break;
 				}
 				else
@@ -174,7 +173,7 @@ public class Controller extends HttpServlet
 		{
 			case "newUser":
 				request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-				// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "makeUser":
 				BizLogic.makeUser(request.getParameter("userID"), request.getParameter("role"), controllerDAO);
@@ -214,17 +213,17 @@ public class Controller extends HttpServlet
 					case "nullFields":
 						request.setAttribute("msg", "Must Have Username and Password entered.");
 						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-						// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						break;
 					case "fieldMismatch":
 						request.setAttribute("msg", "Username Must equal your Password!");
 						request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-						// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						break;
 					case "noUser":
 						request.setAttribute("msg", "The User: " + request.getParameter("userid") + " does not exist.");
 						request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-						// request.getRequestDispatcher("/goHome.jsp").include(request, response);
+						request.getRequestDispatcher("/goHome.jsp").include(request, response);
 						break;
 					case "userFound":
 						UserBean user= BizLogic.getUser(request.getParameter("userid"), controllerDAO);
