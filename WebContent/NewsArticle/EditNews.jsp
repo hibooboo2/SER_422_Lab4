@@ -7,13 +7,14 @@
 <title>Insert title here</title>
 </head>
 <body>
+    <% NewsItemBean article = (NewsItemBean)request.getAttribute("article"); %>
 <form action="./?action=EditNews" method="post">
-        <input type="hidden" value="" name="articleID">
-		Story Title: <input type="text" name="newsTitle" id="titleField"></input><br />
-		Story: <textarea name="newsStory" id="storyField"></textarea><br />
+        <input type="hidden" value="<%= article.getItemID() %>" name="articleID">
+		Story Title: <input type="text" name="newsTitle" id="titleField" value="<%= article.getItemTitle() %>"></input><br />
+		Story: <textarea name="newsStory" id="storyField"><%= article.getItemStory() %></textarea><br />
 		Is this story public?: <select name="isPublic">
-			<option value="true">Yes</option>
-			<option value="false">No</option>
+			<option value="true" <% if(article.isPublic){ %> selected <% } %>>Yes</option>
+			<option value="false" <% if(!article.isPublic){ %> selected <% } %>>No</option>
 		</select>
 		<input type="submit" value="Save News Story">
 	</form>
