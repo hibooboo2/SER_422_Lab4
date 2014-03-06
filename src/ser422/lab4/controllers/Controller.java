@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.Response;
 
 import ser422.lab4.BizLogic.BizLogic;
+import de.svenjacobs.loremipsum.LoremIpsum;
 import edu.asupoly.ser422.lab4.dao.INewsDAO;
 import edu.asupoly.ser422.lab4.dao.NewsDAOFactory;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
@@ -52,6 +53,7 @@ public class Controller extends HttpServlet
 		if (controllerDAO.getClass().toString().equalsIgnoreCase("class edu.asupoly.ser422.lab4.dao.NewsDefaultDAO"))
 		{
 			NewsItemBean[] news= new NewsItemBean[10];
+			LoremIpsum rand= new LoremIpsum();
 			for (int i= 0; i < news.length; i++)
 			{
 				boolean isPublic= false;
@@ -59,11 +61,7 @@ public class Controller extends HttpServlet
 				{
 					isPublic= true;
 				}
-				news[i]=
-						new NewsItemBean(
-								"Lorem Ipsum Stories : " + i,
-								"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed interdum cursus nisi, non tempor orci venenatis nec. Integer posuere nulla non est dapibus, a consectetur neque aliquet. Curabitur vitae facilisis est, in malesuada ligula. Cras tincidunt, libero ac sollicitudin ultrices, tortor enim vestibulum sapien, sed suscipit metus lacus interdum enim. Phasellus posuere est id tristique euismod. Vestibulum eleifend vestibulum leo in aliquet. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas id mauris pretium, semper massa vitae, sagittis neque. Morbi a posuere mi."
-										+ i, "reporter", isPublic);
+				news[i]= new NewsItemBean(rand.getWords(3) + i, rand.getParagraphs() + i, "reporter", isPublic);
 				controllerDAO.createNewsItem(news[i]);
 			}
 		}

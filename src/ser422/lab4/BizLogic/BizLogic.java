@@ -63,9 +63,6 @@ public class BizLogic
 		return controllerDOA.createUser(new UserBean(userName, userName, userRole));
 	}
 
-	{
-	}
-
 	/**
 	 * @param newsItemId
 	 * @param userId
