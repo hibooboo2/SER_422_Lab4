@@ -7,18 +7,15 @@
 <title>Insert title here</title>
 </head>
 <body>
+	<jsp:include page="/header.jsp"></jsp:include>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%
-		//TODO Implement Favorite (Favorite Button)
 		NewsItemBean article= (NewsItemBean) request.getAttribute("article");
 	%>
 	<%
-		if (request.getAttribute("canViewArticle") != null && request.getAttribute("canComment") != null)
+		if (request.getAttribute("canComment") != null)
 		{
-			boolean canViewArticle= ((String) request.getAttribute("canViewArticle")).equalsIgnoreCase("true");
 			boolean canComment= ((String) request.getAttribute("canComment")).equalsIgnoreCase("true");
-			if (canViewArticle)
-			{
 	%>
 	<h1><%=article.getItemTitle()%></h1>
 	<p>
@@ -28,9 +25,6 @@
 	<p><%=article.getItemStory()%></p>
 	<hr />
 	<h3>Comments:</h3>
-	<%
-		}
-	%>
 	<%
 		for (int i= 0; i < article.getComments().length; i++)
 			{

@@ -9,6 +9,10 @@
 <body>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%@ page import="java.util.Enumeration"%>
+	<%@ page import="java.util.Arrays"%>
+	<%@ page import="java.util.ArrayList"%>
+
+	<jsp:include page="/header.jsp"></jsp:include>
 	<%
 		Enumeration<String> attris= request.getSession().getAttributeNames();
 		while (attris.hasMoreElements())
@@ -39,12 +43,22 @@
 	<table>
 		<tr>
 			<th>Stories</th>
-			<th>Buttons</th>
+			<th colspan="3">Buttons</th>
 		</tr>
 		<%
+			ArrayList<NewsItemBean> articlesCanManage=
+					new ArrayList<NewsItemBean>(Arrays.asList((NewsItemBean[]) request.getAttribute("articlesCanManage")));
 			NewsItemBean[] favStories= (NewsItemBean[]) request.getAttribute("favstories");
 			for (int i= 0; i < favStories.length; i++)
 			{
+				if (articlesCanManage.contains(favStories[i]))
+				{
+					request.setAttribute("canManageArticle", "true");
+				}
+				else
+				{
+					request.setAttribute("canManageArticle", "false");
+				}
 				request.setAttribute("isFav", "true");
 				request.setAttribute("article", favStories[i]);
 		%>
@@ -56,6 +70,14 @@
 			NewsItemBean[] notFavStories= (NewsItemBean[]) request.getAttribute("stories");
 			for (int i= 0; i < notFavStories.length; i++)
 			{
+				if (articlesCanManage.contains(notFavStories[i]))
+				{
+					request.setAttribute("canManageArticle", "true");
+				}
+				else
+				{
+					request.setAttribute("canManageArticle", "false");
+				}
 				request.setAttribute("isFav", "false");
 				request.setAttribute("article", notFavStories[i]);
 		%>
@@ -63,6 +85,7 @@
 		<%
 			}
 		%>
+
 	</table>
 </body>
 </html>

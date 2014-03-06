@@ -11,51 +11,56 @@
 
 <%
 	boolean canManageArticle= ((String) request.getAttribute("canManageArticle")).equalsIgnoreCase("true");
-	boolean canViewArticle= ((String) request.getAttribute("canViewArticle")).equalsIgnoreCase("true");
-
-	if (canViewArticle)
-	{
 %>
 <tr>
 	<td><a
 		href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a></td>
-	<td>
 		<%
 			if (canManageArticle)
-				{
+			{
 		%>
+	<td>
 		<form method="post" action="./?action=DeleteArticle">
-			<input value="Delete" type="submit" /> <input type="hidden"
-				name="articleID" value="<%=article.getItemId()%>" />
+			<INPUT TYPE="image" SRC="http://i.imgur.com/jxLMgcu.png" ALT="Delete">
+			<input type="hidden" name="articleID"
+				value="<%=article.getItemId()%>" />
 		</form>
+		</td><td>
 		<form method="post" action="./?action=EditArticleScreen">
-			<input value="Edit Article" type="submit" /> <input type="hidden"
-				name="articleID" value="<%=article.getItemId()%>" />
-		</form> <%
+			<INPUT TYPE="image" SRC="http://i.imgur.com/5kwu1ga.png" ALT="Edit">
+			<input type="hidden" name="articleID"
+				value="<%=article.getItemId()%>" />
+		</form>
+		</td>
+		 <%
  	}
  %> <%
- 	String isFav=((String)request.getAttribute("isFav"));
- 		if (isFav.equalsIgnoreCase("false"))
- 		{
+ 	String isFav= ((String) request.getAttribute("isFav"));
+ 	if (isFav.equalsIgnoreCase("false"))
+ 	{
  %>
+		<td>
 		<form method="post" action="./?action=favArticle">
-			<input value="Favorite" type="submit" /> <input type="hidden"
-				name="articleID" value="<%=article.getItemId()%>" />
-		</form> <%
+			<INPUT TYPE="image" SRC="http://i.imgur.com/xDvlHnA.png"
+				ALT="Favorite"> <input type="hidden" name="articleID"
+				value="<%=article.getItemId()%>" />
+		</form>
+		</td>
+		 <%
  	}
- 		else
- 		{
+ 	else
+ 	{
  %>
+	<td>
 		<form method="post" action="./?action=unFavArticle">
-			<input value="UnFavorite" type="submit" /> <input type="hidden"
-				name="articleID" value="<%=article.getItemId()%>" />
-		</form> <%
+			<INPUT TYPE="image" SRC="http://i.imgur.com/EDyRVs5.png"
+				ALT="UnFavorite"> <input type="hidden" name="articleID"
+				value="<%=article.getItemId()%>" />
+		</form>
+	</td>
+	<%
  	}
  %>
-	</td>
 </tr>
 
-<%
-	}
-%>
 

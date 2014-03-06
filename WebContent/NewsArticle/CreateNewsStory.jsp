@@ -7,20 +7,15 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<%
-		if(((String)(request.getAttribute("canAuthorArticles"))).equalsIgnoreCase("true")) {
-	%>
+	<jsp:include page="/header.jsp"></jsp:include>
 	<form action="./?action=createNewsStory" method="post">
 		Story Title: <input type="text" name="newsTitle" id="titleField"></input><br />
-		Story: <textarea name="newsStory" id="storyField"></textarea><br />
-		Is this story public?: <select name="isPublic">
+		Story:
+		<textarea name="newsStory" id="storyField"></textarea>
+		<br /> Is this story public?: <select name="isPublic">
 			<option value="true">Yes</option>
 			<option value="false">No</option>
-		</select>
-		<input type="submit" value="Publish News Story">
+		</select> <input type="submit" value="Publish News Story">
 	</form>
-	<%
-		}
-	%>
 </body>
 </html>

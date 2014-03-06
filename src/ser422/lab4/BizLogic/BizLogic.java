@@ -186,36 +186,20 @@ public class BizLogic
 	}
 
 	/**
-	 * 
-	 */
-	public static void makeRandomStories()
-	{
-
-		theDAO= NewsDAOFactory.getTheDAO();
-		// if (controllerDAO.getClass().toString().equalsIgnoreCase("class edu.asupoly.ser422.lab4.dao.NewsDefaultDAO"))
-		// {
-		NewsItemBean[] news= new NewsItemBean[10];
-		LoremIpsum rand= new LoremIpsum();
-		for (int i= 0; i < news.length; i++)
-		{
-			boolean isPublic= false;
-			if (i % 2 == 0)
-			{
-				isPublic= true;
-			}
-			news[i]= new NewsItemBean(rand.getWords(3) + i, rand.getParagraphs() + i, "reporter", isPublic);
-			theDAO.createNewsItem(news[i]);
-		}
-	}
-
-	/**
 	 * @param parseInt
 	 * @return
 	 */
-	public static NewsItemBean getNewsItem(int articleID)
+	public static NewsItemBean getNewsItem(String userName, int articleID)
 	{
 
-		return theDAO.getNewsItem(articleID);
+		if (canViewArticle(userName, articleID))
+		{
+			return theDAO.getNewsItem(articleID);
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -227,22 +211,37 @@ public class BizLogic
 
 		// TODO: Implement THIS SHIT!
 		// TODO: This should filter Articles Based On roles!
-		ArrayList<NewsItemBean[]> both= new ArrayList<NewsItemBean[]>();
-		ArrayList<NewsItemBean> favArticles= new ArrayList<NewsItemBean>();
-		UserBean currentUser= theDAO.getUser(userName);
-		ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
+		ArrayList<NewsItemBean[]> allForUser= new ArrayList<NewsItemBean[]>();
 		ArrayList<NewsItemBean> allArticles= new ArrayList<NewsItemBean>(Arrays.asList(theDAO.getNews()));
+		ArrayList<NewsItemBean> favArticles= new ArrayList<NewsItemBean>();
+		ArrayList<NewsItemBean> canManage= new ArrayList<NewsItemBean>();
+		ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
+		UserBean currentUser= theDAO.getUser(userName);
+		ArrayList<NewsItemBean> cantView= new ArrayList<NewsItemBean>();
+		for (NewsItemBean article : allArticles)
+		{
+			if (!canViewArticle(userName, article.getItemId()))
+			{
+				cantView.add(article);
+			}
+		}
+		allArticles.removeAll(cantView);
 		for (NewsItemBean article : allArticles)
 		{
 			if (favs.contains(article.getItemId()))
 			{
 				favArticles.add(article);
 			}
+			if (canManageArticle(userName, article.getItemId()))
+			{
+				canManage.add(article);
+			}
 		}
 		allArticles.removeAll(favArticles);
-		both.add(favArticles.toArray(new NewsItemBean[favArticles.size()]));
-		both.add(allArticles.toArray(new NewsItemBean[allArticles.size()]));
-		return both;
+		allForUser.add(favArticles.toArray(new NewsItemBean[favArticles.size()]));
+		allForUser.add(allArticles.toArray(new NewsItemBean[allArticles.size()]));
+		allForUser.add(canManage.toArray(new NewsItemBean[canManage.size()]));
+		return allForUser;
 	}
 
 	/**
@@ -270,10 +269,21 @@ public class BizLogic
 	public static boolean canViewArticle(String user, int articleID)
 	{
 
-		boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
-		boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
-		boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
-		if ((theDAO.getNewsItem(articleID).isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
+		if (!user.equalsIgnoreCase("none"))
+		{
+			boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
+			boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
+			boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
+			if ((theDAO.getNewsItem(articleID).isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (theDAO.getNewsItem(articleID).isPublic())
 		{
 			return true;
 		}
@@ -281,6 +291,7 @@ public class BizLogic
 		{
 			return false;
 		}
+
 	}
 
 	/**
@@ -291,16 +302,70 @@ public class BizLogic
 	public static boolean canComment(String user, int articleID)
 	{
 
-		boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
-		boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
-		boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
-		if ((isSubscriber) || (isReporter && isArticleAuthor))
+		if (!user.equalsIgnoreCase("none"))
 		{
-			return false;
+			boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
+			boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
+			boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
+			return ((isSubscriber) || (isReporter && isArticleAuthor));
 		}
 		else
 		{
 			return false;
+		}
+
+	}
+
+	/**
+	 * @param user
+	 * @return
+	 */
+	public static boolean canAuthorArticles(String user)
+	{
+
+		if (!user.equalsIgnoreCase("none"))
+		{
+			return theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Reporter");
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static boolean canManageArticle(String user, int articleID)
+	{
+
+		if (!user.equalsIgnoreCase("none"))
+		{
+			boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
+			boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
+			return (isReporter && isArticleAuthor);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public static void makeRandomStories()
+	{
+
+		theDAO= NewsDAOFactory.getTheDAO();
+		NewsItemBean[] news= new NewsItemBean[10];
+		LoremIpsum rand= new LoremIpsum();
+		for (int i= 0; i < news.length; i++)
+		{
+			boolean isPublic= false;
+			if (i % 2 == 0)
+			{
+				isPublic= true;
+			}
+			news[i]= new NewsItemBean(rand.getWords(3) + i, rand.getParagraphs() + i, "reporter", isPublic);
+			theDAO.createNewsItem(news[i]);
 		}
 	}
 }

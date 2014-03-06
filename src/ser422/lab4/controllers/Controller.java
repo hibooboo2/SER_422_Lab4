@@ -71,49 +71,60 @@ public class Controller extends HttpServlet
 		switch (action)
 		{
 			case "viewArticle":
-				NewsItemBean article= BizLogic.getNewsItem(Integer.parseInt(request.getParameter("articleID")));
-				boolean canViewArticle=
-						BizLogic.canViewArticle((String) request.getSession(false).getAttribute("user"),
-								Integer.parseInt(request.getParameter("articleID")));
-				boolean canComment=
-						BizLogic.canComment((String) request.getSession(false).getAttribute("user"),
-								Integer.parseInt(request.getParameter("articleID")));
-				request.setAttribute("canViewArticle", String.valueOf(canViewArticle));
-				request.setAttribute("canComment", String.valueOf(canComment));
-
-				request.setAttribute("article", article);
-				request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				NewsItemBean article=
+				BizLogic.getNewsItem(this.currentUserID(request), Integer.parseInt(request.getParameter("articleID")));
+				if (article != null)
+				{
+					boolean canComment=
+							BizLogic.canComment(this.currentUserID(request), Integer.parseInt(request.getParameter("articleID")));
+					request.setAttribute("canComment", String.valueOf(canComment));
+					request.setAttribute("article", article);
+					request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
+					this.userMenu(request, response);
+				}
+				else
+				{
+					response.sendRedirect("/Authentication/login.jsp");
+				}
 				// response.sendRedirect("/Authentication/login.jsp?returnTO=viewArticle&articleID="
 				// + request.getParameter("articleID"));
 				break;
 			case "login":
 				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				this.userMenu(request, response);
 				break;
 			case "logout":
 				request.getSession().invalidate();
 				response.sendRedirect("./");
 				break;
 			case "createNewsStory":
-				request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				boolean canAuthorArticle= BizLogic.canAuthorArticles(this.currentUserID(request));
+				if (canAuthorArticle)
+				{
+					request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").include(request, response);
+					this.userMenu(request, response);
+				}
+				else
+				{
+					request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
+				}
 				break;
 			case "news":
 				ArrayList<NewsItemBean[]> stories;
-				if ((stories= BizLogic.getNews((String) request.getSession(false).getAttribute("user"), this.getCookieMap(request))) != null)
+				if ((stories= BizLogic.getNews(this.currentUserID(request), this.getCookieMap(request))) != null)
 				{
 					request.setAttribute("favstories", stories.get(0));
 					request.setAttribute("stories", stories.get(1));
+					request.setAttribute("articlesCanManage", stories.get(2));
 					request.getRequestDispatcher("home.jsp").include(request, response);
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					this.userMenu(request, response);
 					response.getWriter().println(NewsDAOFactory.getTheDAO().getClass().toString());
 					break;
 				}
 				else
 				{
 					response.getWriter().println("WHAT THE FUCK?");
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					this.userMenu(request, response);
 					break;
 				}
 			default:
@@ -129,12 +140,7 @@ public class Controller extends HttpServlet
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 
-		if (request.getHeader("from") != null && !request.getHeader("from").equalsIgnoreCase("go"))
-		{
-			String to= request.getHeader("from");
-			response.setHeader("from", "go");
-			response.sendRedirect(to);
-		}
+		this.bounceBack(request, response);
 		this.setResponseStuff(response);
 		this.createSession(request, response);
 		String action= "";
@@ -153,7 +159,7 @@ public class Controller extends HttpServlet
 			{
 				case "newUser":
 					request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					this.userMenu(request, response);
 					break;
 				case "makeUser":
 					BizLogic.makeUser(request.getParameter("userID"), request.getParameter("role"));
@@ -180,9 +186,10 @@ public class Controller extends HttpServlet
 					response.sendRedirect("./");
 					break;
 				case "EditArticleScreen":
-					request.setAttribute("article", BizLogic.getNewsItem(Integer.parseInt(request.getParameter("articleID"))));
+					request.setAttribute("article",
+							BizLogic.getNewsItem(this.currentUserID(request), Integer.parseInt(request.getParameter("articleID"))));
 					request.getRequestDispatcher("./NewsArticle/EditNews.jsp").include(request, response);
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					this.userMenu(request, response);
 					break;
 				case "EditArticle":
 					BizLogic.editStory(Integer.parseInt(request.getParameter("articleID")), request.getParameter("newsTitle"),
@@ -190,9 +197,8 @@ public class Controller extends HttpServlet
 					response.sendRedirect("./?msg=Updated%20" + request.getParameter("newsTitle"));
 					break;
 				case "createNewsStory":
-					BizLogic.createNewsStory(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStory"),
-							(String) request.getSession(false).getAttribute("user"),
-							Boolean.parseBoolean((request.getParameter("isPublic")))));
+					BizLogic.createNewsStory(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStory"), this
+							.currentUserID(request), Boolean.parseBoolean((request.getParameter("isPublic")))));
 					response.sendRedirect("./");
 					break;
 				case "login":
@@ -203,6 +209,17 @@ public class Controller extends HttpServlet
 					break;
 			}
 		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	private String currentUserID(HttpServletRequest request)
+	{
+	
+		return (String) request.getSession(false).getAttribute("user");
 	}
 
 	/**
@@ -277,17 +294,17 @@ public class Controller extends HttpServlet
 			case "nullFields":
 				request.setAttribute("msg", "Must Have Username and Password entered.");
 				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				this.userMenu(request, response);
 				break;
 			case "fieldMismatch":
 				request.setAttribute("msg", "Username Must equal your Password!");
 				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				this.userMenu(request, response);
 				break;
 			case "noUser":
 				request.setAttribute("msg", "The User: " + request.getParameter("userid") + " does not exist.");
 				request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				this.userMenu(request, response);
 				break;
 			case "userFound":
 				UserBean user= BizLogic.getUser(request.getParameter("userid"));
@@ -307,6 +324,18 @@ public class Controller extends HttpServlet
 				response.sendError(Response.SC_BAD_REQUEST);
 				break;
 		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void userMenu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		request.setAttribute("canAuthorArticles", String.valueOf(BizLogic.canAuthorArticles(this.currentUserID(request))));
+		request.getRequestDispatcher("/goHome.jsp").include(request, response);
 	}
 
 	/**
@@ -356,6 +385,7 @@ public class Controller extends HttpServlet
 	private void bounceBack(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 
+		// TODO: MAYBE MAKE THIS WORK? LAST PRIORITY!
 		if (request.getHeader("from") != null && !request.getHeader("from").equalsIgnoreCase("go"))
 		{
 			String to= request.getHeader("from");

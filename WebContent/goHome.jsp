@@ -24,7 +24,7 @@
 %>
 </head>
 <%
-	if (((String) request.getAttribute("canCreateNewsStory")).equalsIgnoreCase("true"))
+	if (((String) request.getAttribute("canAuthorArticles")).equalsIgnoreCase("true"))
 	{
 %>
 <div id="reporterMenu">
