@@ -1,12 +1,16 @@
 
 package ser422.lab4.BizLogic;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import de.svenjacobs.loremipsum.LoremIpsum;
 import edu.asupoly.ser422.lab4.dao.INewsDAO;
+import edu.asupoly.ser422.lab4.dao.NewsDAOFactory;
 import edu.asupoly.ser422.lab4.model.NewsItemBean;
 import edu.asupoly.ser422.lab4.model.UserBean;
 import edu.asupoly.ser422.lab4.model.UserBean.Role;
@@ -14,7 +18,9 @@ import edu.asupoly.ser422.lab4.model.UserBean.Role;
 public class BizLogic
 {
 
-	public static String checkForUser(String userId, String passwd, INewsDAO controllerDOA)
+	private static INewsDAO	theDAO	= NewsDAOFactory.getTheDAO();
+
+	public static String checkForUser(String userId, String passwd)
 	{
 
 		String action= "";
@@ -29,7 +35,7 @@ public class BizLogic
 		// HERE YOU HAVE TO CHECK IF THE USER EXISTS OR NOT!
 		else
 		{
-			UserBean user= controllerDOA.getUser(userId);
+			UserBean user= theDAO.getUser(userId);
 			if (user == null)
 			{
 				action= "noUser";
@@ -47,7 +53,7 @@ public class BizLogic
 	 * @param role
 	 * @param passWord
 	 */
-	public static boolean makeUser(String userName, String role, INewsDAO controllerDOA)
+	public static boolean makeUser(String userName, String role)
 	{
 
 		Role userRole= null;
@@ -60,7 +66,7 @@ public class BizLogic
 				userRole= Role.REPORTER;
 				break;
 		}
-		return controllerDOA.createUser(new UserBean(userName, userName, userRole));
+		return theDAO.createUser(new UserBean(userName, userName, userRole));
 	}
 
 	/**
@@ -69,30 +75,30 @@ public class BizLogic
 	 * @param comment
 	 * @param controllerDAO
 	 */
-	public static void addComment(int newsItemId, String userId, String comment, INewsDAO controllerDAO)
+	public static void addComment(int newsItemId, String userId, String comment)
 	{
-		controllerDAO.storeComment(newsItemId, userId, comment);
+
+		theDAO.storeComment(newsItemId, userId, comment);
 	}
 
 	/**
 	 * @param userID
-	 * @param controllerDAO
 	 * @return
 	 */
-	public static UserBean getUser(String userID, INewsDAO controllerDAO)
+	public static UserBean getUser(String userID)
 	{
 
-		return controllerDAO.getUser(userID);
+		return theDAO.getUser(userID);
 	}
 
 	/**
 	 * @param articleID
 	 * @param controllerDAO
 	 */
-	public static boolean deleteArticle(String articleID, INewsDAO controllerDAO)
+	public static boolean deleteArticle(String articleID)
 	{
 
-		return controllerDAO.deleteNewsItem(Integer.parseInt(articleID));
+		return theDAO.deleteNewsItem(Integer.parseInt(articleID));
 	}
 
 	/**
@@ -100,29 +106,24 @@ public class BizLogic
 	 * @param parameter2
 	 * @param controllerDAO
 	 */
-	public static boolean createNewsStory(NewsItemBean newArticle, INewsDAO controllerDAO)
+	public static boolean createNewsStory(NewsItemBean newArticle)
 	{
-		return controllerDAO.createNewsItem(newArticle);
+
+		return theDAO.createNewsItem(newArticle);
 	}
 
 	/**
 	 * @param newFav
-	 * @param cookies
+	 * @param cookieMap
 	 * @param response
 	 */
-	public static void addFavorite(String newFav, Cookie[] cookies, HttpServletResponse response)
+	public static void addFavorite(String newFav, HashMap<String,String> cookieMap, HttpServletResponse response)
 	{
 
-		HashMap<String,String> cookiesMap= new HashMap<String,String>();
-		if (cookies != null)
+		if (cookieMap.containsKey("favs"))
 		{
-			for (Cookie coo : cookies)
-			{
-				cookiesMap.put(coo.getName(), coo.getValue());
-				response.addCookie(coo);
-			}
-			cookiesMap.get("favs");
-			Cookie favsCookie= new Cookie("favs", cookiesMap.get("favs") + ":" + newFav);
+			cookieMap.get("favs");
+			Cookie favsCookie= new Cookie("favs", cookieMap.get("favs") + ":" + newFav);
 			response.addCookie(favsCookie);
 		}
 		else
@@ -130,5 +131,101 @@ public class BizLogic
 			Cookie favsCookie= new Cookie("favs", newFav);
 			response.addCookie(favsCookie);
 		}
+	}
+
+	/**
+	 * @param isPublic
+	 * @param parameter
+	 * @param parameter2
+	 * @param parameter3
+	 */
+	public static boolean editStory(int articleID, String newsTitle, String newsStory, Boolean isPublic)
+	{
+
+		boolean updated;
+		if (updated= theDAO.updateNewsItem(articleID, newsTitle, newsStory))
+		{
+			NewsItemBean article= theDAO.getNewsItem(articleID);
+			synchronized (article)
+			{
+				article.setPublic(isPublic);
+			}
+		}
+		return updated;
+	}
+
+	/**
+	 * 
+	 */
+	public static void makeRandomStories()
+	{
+
+		theDAO= NewsDAOFactory.getTheDAO();
+		// if (controllerDAO.getClass().toString().equalsIgnoreCase("class edu.asupoly.ser422.lab4.dao.NewsDefaultDAO"))
+		// {
+		NewsItemBean[] news= new NewsItemBean[10];
+		LoremIpsum rand= new LoremIpsum();
+		for (int i= 0; i < news.length; i++)
+		{
+			boolean isPublic= false;
+			if (i % 2 == 0)
+			{
+				isPublic= true;
+			}
+			news[i]= new NewsItemBean(rand.getWords(3) + i, rand.getParagraphs() + i, "reporter", isPublic);
+			theDAO.createNewsItem(news[i]);
+		}
+	}
+
+	/**
+	 * @param parseInt
+	 * @return
+	 */
+	public static NewsItemBean getNewsItem(int articleID)
+	{
+
+		return theDAO.getNewsItem(articleID);
+	}
+
+	/**
+	 * @param attribute
+	 * @return
+	 */
+	public static NewsItemBean[] getNews(String userName, HashMap<String,String> cookieMap)
+	{
+
+		// TODO: Implement THIS SHIT!
+		// TODO: This should filter Articles Based On roles!
+		ArrayList<NewsItemBean> newsArticles= new ArrayList<NewsItemBean>();
+		UserBean currentUser= theDAO.getUser(userName);
+		ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
+		ArrayList<NewsItemBean> allArticles= new ArrayList<NewsItemBean>(Arrays.asList(theDAO.getNews()));
+		for (NewsItemBean article : allArticles)
+		{
+			if (favs.contains(article.getItemId()))
+			{
+				newsArticles.add(article);
+			}
+		}
+		allArticles.removeAll(newsArticles);
+		newsArticles.addAll(allArticles);
+		return newsArticles.toArray(new NewsItemBean[newsArticles.size()]);
+		// return null;
+	}
+
+	/**
+	 * @param string
+	 */
+	private static ArrayList<Integer> parseFavs(String favs)
+	{
+		ArrayList<Integer> theFavs= new ArrayList<Integer>();
+		if (favs != null)
+		{
+			for (String fav : favs.split(":"))
+			{
+				theFavs.add(Integer.parseInt(fav));
+			}
+		}
+		return theFavs;
 	}
 }

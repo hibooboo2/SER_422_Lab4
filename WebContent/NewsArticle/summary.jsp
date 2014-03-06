@@ -16,36 +16,31 @@
 	if ((article.isPublic() || isSubscriber) || (isReporter && didWriteArticle))
 	{
 %>
-	<tr>
-		<td><a
-			href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a></td>
-		<td>
+<tr>
+	<td><a
+		href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a></td>
+	<td>
 		<%
 			if (didWriteArticle && isReporter)
 				{
 		%>
-			<form method="post" action="./?action=DeleteArticle">
-				<input value="Delete" type="submit" /> <input type="hidden"
-					name="articleID" value="<%=article.getItemId()%>" />
-			</form>
-		
-		<%
-			}
-		%>
-		<%
-			if (isSubscriber || isReporter)
-				{
-		%>
-		
-			<form method="post" action="./?action=favArticle">
-				<input value="Favorite" type="submit" /> <input type="hidden"
-					name="articleID" value="<%=article.getItemId()%>" />
-			</form>
-		<%
-			}
-		%>
-		</td>
-	</tr>
+		<form method="post" action="./?action=DeleteArticle">
+			<input value="Delete" type="submit" /> <input type="hidden"
+				name="articleID" value="<%=article.getItemId()%>" />
+		</form>
+		<form method="post" action="./?action=EditArticleScreen">
+			<input value="Edit Article" type="submit" /> <input type="hidden"
+				name="articleID" value="<%=article.getItemId()%>" />
+		</form> <%
+ 	}
+ %>
+
+		<form method="post" action="./?action=favArticle">
+			<input value="Favorite" type="submit" /> <input type="hidden"
+				name="articleID" value="<%=article.getItemId()%>" />
+		</form>
+	</td>
+</tr>
 
 <%
 	}
