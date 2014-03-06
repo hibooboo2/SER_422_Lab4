@@ -2,6 +2,7 @@
 package ser422.lab4.controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.servlet.Servlet;
@@ -108,11 +109,11 @@ public class Controller extends HttpServlet
 				request.getRequestDispatcher("/goHome.jsp").include(request, response);
 				break;
 			case "news":
-				NewsItemBean[] stories;
+				ArrayList<NewsItemBean[]> stories;
 				if ((stories= BizLogic.getNews((String) request.getSession(false).getAttribute("user"), this.getCookieMap(request))) != null)
 				{
-					request.setAttribute("articlesNumber", stories.length);
-					request.setAttribute("stories", stories);
+					request.setAttribute("favstories", stories.get(0));
+					request.setAttribute("stories", stories.get(1));
 					request.getRequestDispatcher("home.jsp").include(request, response);
 					request.getRequestDispatcher("/goHome.jsp").include(request, response);
 					response.getWriter().println(NewsDAOFactory.getTheDAO().getClass().toString());
@@ -169,6 +170,11 @@ public class Controller extends HttpServlet
 			case "favArticle":
 				// TODO: Must do the logic to display the favorite articles separately. Favorites them with cookies right now. Commented
 				BizLogic.addFavorite(request.getParameter("articleID"), this.getCookieMap(request), response);
+				response.sendRedirect("./");
+				break;
+			case "unFavArticle":
+				// TODO: Must do the logic to display the favorite articles separately. Favorites them with cookies right now. Commented
+				BizLogic.removeFavorite(Integer.parseInt(request.getParameter("articleID")), this.getCookieMap(request), response);
 				response.sendRedirect("./");
 				break;
 			case "EditArticleScreen":

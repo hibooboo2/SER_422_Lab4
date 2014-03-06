@@ -134,6 +134,37 @@ public class BizLogic
 	}
 
 	/**
+	 * @param articleID
+	 * @param cookieMap
+	 * @param response
+	 */
+	public static void removeFavorite(int articleID, HashMap<String,String> cookieMap, HttpServletResponse response)
+	{
+
+		if (cookieMap.containsKey("favs"))
+		{
+			ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
+			favs.remove((Integer) articleID);
+			if (favs.size() > 0)
+			{
+				String newFavs= "" + favs.get(0);
+				for (int i= 0; i < (favs.size() - 1); i++)
+				{
+					newFavs+= ":" + favs.get(i + 1);
+				}
+				Cookie favsCookie= new Cookie("favs", newFavs);
+				response.addCookie(favsCookie);
+			}
+			else
+			{
+				Cookie favsCookie= new Cookie("favs", "");
+				favsCookie.setMaxAge(0);
+				response.addCookie(favsCookie);
+			}
+		}
+	}
+
+	/**
 	 * @param isPublic
 	 * @param parameter
 	 * @param parameter2
@@ -191,12 +222,13 @@ public class BizLogic
 	 * @param attribute
 	 * @return
 	 */
-	public static NewsItemBean[] getNews(String userName, HashMap<String,String> cookieMap)
+	public static ArrayList<NewsItemBean[]> getNews(String userName, HashMap<String,String> cookieMap)
 	{
 
 		// TODO: Implement THIS SHIT!
 		// TODO: This should filter Articles Based On roles!
-		ArrayList<NewsItemBean> newsArticles= new ArrayList<NewsItemBean>();
+		ArrayList<NewsItemBean[]> both = new ArrayList<NewsItemBean[]>();
+		ArrayList<NewsItemBean> favArticles= new ArrayList<NewsItemBean>();
 		UserBean currentUser= theDAO.getUser(userName);
 		ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
 		ArrayList<NewsItemBean> allArticles= new ArrayList<NewsItemBean>(Arrays.asList(theDAO.getNews()));
@@ -204,13 +236,13 @@ public class BizLogic
 		{
 			if (favs.contains(article.getItemId()))
 			{
-				newsArticles.add(article);
+				favArticles.add(article);
 			}
 		}
-		allArticles.removeAll(newsArticles);
-		newsArticles.addAll(allArticles);
-		return newsArticles.toArray(new NewsItemBean[newsArticles.size()]);
-		// return null;
+		allArticles.removeAll(favArticles);
+		both.add(favArticles.toArray(new NewsItemBean[favArticles.size()]));
+		both.add(allArticles.toArray(new NewsItemBean[allArticles.size()]));
+		return both;
 	}
 
 	/**
@@ -218,6 +250,7 @@ public class BizLogic
 	 */
 	private static ArrayList<Integer> parseFavs(String favs)
 	{
+
 		ArrayList<Integer> theFavs= new ArrayList<Integer>();
 		if (favs != null)
 		{

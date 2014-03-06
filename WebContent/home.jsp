@@ -1,4 +1,3 @@
-<%@page import="org.apache.jasper.tagplugins.jstl.core.ForEach"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -8,7 +7,6 @@
 <title>I have No IDEA News</title>
 </head>
 <body>
-	<%@ page import="edu.asupoly.ser422.lab4.dao.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%@ page import="java.util.Enumeration"%>
 	<%
@@ -43,10 +41,22 @@
 			<th>Buttons</th>
 		</tr>
 		<%
-			NewsItemBean[] stories= (NewsItemBean[]) request.getAttribute("stories");
-			for (int i= 0; i < stories.length; i++)
+			NewsItemBean[] favStories= (NewsItemBean[]) request.getAttribute("favstories");
+			for (int i= 0; i < favStories.length; i++)
 			{
-				request.setAttribute("article", stories[i]);
+				request.setAttribute("isFav","true");
+				request.setAttribute("article", favStories[i]);
+		%>
+		<jsp:include page="NewsArticle/summary.jsp"></jsp:include>
+		<%
+			}
+		%>
+		<%
+			NewsItemBean[] notFavStories= (NewsItemBean[]) request.getAttribute("stories");
+			for (int i= 0; i < notFavStories.length; i++)
+			{
+				request.setAttribute("isFav","false");
+				request.setAttribute("article", notFavStories[i]);
 		%>
 		<jsp:include page="NewsArticle/summary.jsp"></jsp:include>
 		<%

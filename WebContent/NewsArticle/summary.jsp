@@ -33,12 +33,25 @@
 				name="articleID" value="<%=article.getItemId()%>" />
 		</form> <%
  	}
+ %> <%
+ 	String isFav=((String)request.getAttribute("isFav"));
+ 		if (isFav.equalsIgnoreCase("false"))
+ 		{
  %>
-
 		<form method="post" action="./?action=favArticle">
 			<input value="Favorite" type="submit" /> <input type="hidden"
 				name="articleID" value="<%=article.getItemId()%>" />
-		</form>
+		</form> <%
+ 	}
+ 		else
+ 		{
+ %>
+		<form method="post" action="./?action=unFavArticle">
+			<input value="UnFavorite" type="submit" /> <input type="hidden"
+				name="articleID" value="<%=article.getItemId()%>" />
+		</form> <%
+ 	}
+ %>
 	</td>
 </tr>
 
