@@ -227,7 +227,7 @@ public class BizLogic
 
 		// TODO: Implement THIS SHIT!
 		// TODO: This should filter Articles Based On roles!
-		ArrayList<NewsItemBean[]> both = new ArrayList<NewsItemBean[]>();
+		ArrayList<NewsItemBean[]> both= new ArrayList<NewsItemBean[]>();
 		ArrayList<NewsItemBean> favArticles= new ArrayList<NewsItemBean>();
 		UserBean currentUser= theDAO.getUser(userName);
 		ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
@@ -260,5 +260,47 @@ public class BizLogic
 			}
 		}
 		return theFavs;
+	}
+
+	/**
+	 * @param attribute
+	 * @param articleID
+	 * @return
+	 */
+	public static boolean canViewArticle(String user, int articleID)
+	{
+
+		boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
+		boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
+		boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
+		if ((theDAO.getNewsItem(articleID).isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * @param attribute
+	 * @param parseInt
+	 * @return
+	 */
+	public static boolean canComment(String user, int articleID)
+	{
+
+		boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
+		boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
+		boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
+		if ((isSubscriber) || (isReporter && isArticleAuthor))
+		{
+			return false;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

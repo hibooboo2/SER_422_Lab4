@@ -19,13 +19,12 @@
 	if (request.getSession(false) == null)
 	{
 		request.getSession();
-		request.getSession().setAttribute("role", "Guest");
 		request.getSession().setAttribute("user", "none");
 	}
 %>
 </head>
 <%
-	if (((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter"))
+	if (((String) request.getAttribute("canCreateNewsStory")).equalsIgnoreCase("true"))
 	{
 %>
 <div id="reporterMenu">
@@ -41,7 +40,7 @@
 		<tr>
 			<td><a href="./?action=news"><img src="http://goo.gl/Ac8kn9"
 					alt="Home Button" height="40" width="40"> </a> <%
- 	if (request.getSession().getAttribute("user") == "none")
+ 	if (((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase("none"))
  	{
  %> <a href="?action=login"><img
 					src="http://i.imgur.com/5INsaoH.png" alt="Login Button"> </a> <%

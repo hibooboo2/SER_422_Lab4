@@ -27,6 +27,7 @@
 		}
 		}
 	%>
+	<br>
 	<%
 		if (request.getParameter("msg") != null)
 		{
@@ -44,7 +45,7 @@
 			NewsItemBean[] favStories= (NewsItemBean[]) request.getAttribute("favstories");
 			for (int i= 0; i < favStories.length; i++)
 			{
-				request.setAttribute("isFav","true");
+				request.setAttribute("isFav", "true");
 				request.setAttribute("article", favStories[i]);
 		%>
 		<jsp:include page="NewsArticle/summary.jsp"></jsp:include>
@@ -55,7 +56,7 @@
 			NewsItemBean[] notFavStories= (NewsItemBean[]) request.getAttribute("stories");
 			for (int i= 0; i < notFavStories.length; i++)
 			{
-				request.setAttribute("isFav","false");
+				request.setAttribute("isFav", "false");
 				request.setAttribute("article", notFavStories[i]);
 		%>
 		<jsp:include page="NewsArticle/summary.jsp"></jsp:include>
@@ -65,7 +66,3 @@
 	</table>
 </body>
 </html>
-<!-- Diplay Articles.Based on Permissions Per role. Edit Delete Links Based on permissions.  
-	Have Login button. To go to Login.
-	About goes to a site About Page.
- -->

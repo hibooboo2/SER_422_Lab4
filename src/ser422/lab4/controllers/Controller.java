@@ -35,7 +35,6 @@ public class Controller extends HttpServlet
 	{
 
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -47,8 +46,6 @@ public class Controller extends HttpServlet
 
 		super.init(config);
 		BizLogic.makeRandomStories();
-		// }
-		// controllerDAO= new NewsDummyDAO();
 	}
 
 	/**
@@ -58,13 +55,9 @@ public class Controller extends HttpServlet
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 
-		// TODO Auto-generated method stub
-		// Get the action
-		// Listing all news items - getNews();
-		// Set response attribute with that array.
-		// request dispatcher forward to the view with our response.
 		this.setResponseStuff(response);
 		this.createSession(request, response);
+		this.bounceBack(request, response);
 		String action= null;
 		if ((request.getParameter("action") != null))
 		{
@@ -74,27 +67,25 @@ public class Controller extends HttpServlet
 		{
 			action= "news";
 		}
-		if (request.getSession(false) != null && request.getSession(false).getAttribute("authenticatedAction") != null)
-		{
-			action= (String) request.getSession(false).getAttribute("authenticatedAction");
-		}
+		this.confirmAuthentication(response, request, action);
 		switch (action)
 		{
 			case "viewArticle":
 				NewsItemBean article= BizLogic.getNewsItem(Integer.parseInt(request.getParameter("articleID")));
-				boolean isReporter= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter");
-				boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
-				boolean isArticleAuthor= article.getReporterId().equalsIgnoreCase((String) request.getSession(false).getAttribute("user"));
-				if ((article.isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
-				{
-					request.setAttribute("article", article);
-					request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
-					request.getRequestDispatcher("/goHome.jsp").include(request, response);
-				}
-				else
-				{
-					response.sendRedirect("/Authentication/login.jsp?returnTO=viewArticle&articleID=" + request.getParameter("articleID"));
-				}
+				boolean canViewArticle=
+						BizLogic.canViewArticle((String) request.getSession(false).getAttribute("user"),
+								Integer.parseInt(request.getParameter("articleID")));
+				boolean canComment=
+						BizLogic.canComment((String) request.getSession(false).getAttribute("user"),
+								Integer.parseInt(request.getParameter("articleID")));
+				request.setAttribute("canViewArticle", String.valueOf(canViewArticle));
+				request.setAttribute("canComment", String.valueOf(canComment));
+
+				request.setAttribute("article", article);
+				request.getRequestDispatcher("/NewsArticle/NewsArticle.jsp").include(request, response);
+				request.getRequestDispatcher("/goHome.jsp").include(request, response);
+				// response.sendRedirect("/Authentication/login.jsp?returnTO=viewArticle&articleID="
+				// + request.getParameter("articleID"));
 				break;
 			case "login":
 				request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
@@ -138,6 +129,12 @@ public class Controller extends HttpServlet
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 
+		if (request.getHeader("from") != null && !request.getHeader("from").equalsIgnoreCase("go"))
+		{
+			String to= request.getHeader("from");
+			response.setHeader("from", "go");
+			response.sendRedirect(to);
+		}
 		this.setResponseStuff(response);
 		this.createSession(request, response);
 		String action= "";
@@ -145,60 +142,78 @@ public class Controller extends HttpServlet
 		{
 			action= request.getParameter("action");
 		}
-		switch (action)
+		if (this.requiresLogin(action) && !this.isLoggedIN(request))
 		{
-			case "newUser":
-				request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
-				break;
-			case "makeUser":
-				BizLogic.makeUser(request.getParameter("userID"), request.getParameter("role"));
-				request.getSession();
-				request.getSession(false).setAttribute("user", request.getParameter("userID"));
-				request.getSession(false).setAttribute("role", request.getParameter("role"));
-				response.sendRedirect("./");
-				break;
-			case "addComment":
-				BizLogic.addComment(Integer.parseInt(request.getParameter("articleID")),
-						(String) request.getSession(false).getAttribute("user"), request.getParameter("comment"));
-				response.sendRedirect("?" + request.getParameter("from"));
-				break;
-			case "DeleteArticle":
-				request.setAttribute("msg", "News Article deleted:" + BizLogic.deleteArticle(request.getParameter("articleID")));
-				response.sendRedirect("./?msg=ARTICLE DELETED");
-				break;
-			case "favArticle":
-				// TODO: Must do the logic to display the favorite articles separately. Favorites them with cookies right now. Commented
-				BizLogic.addFavorite(request.getParameter("articleID"), this.getCookieMap(request), response);
-				response.sendRedirect("./");
-				break;
-			case "unFavArticle":
-				// TODO: Must do the logic to display the favorite articles separately. Favorites them with cookies right now. Commented
-				BizLogic.removeFavorite(Integer.parseInt(request.getParameter("articleID")), this.getCookieMap(request), response);
-				response.sendRedirect("./");
-				break;
-			case "EditArticleScreen":
-				request.setAttribute("article", BizLogic.getNewsItem(Integer.parseInt(request.getParameter("articleID"))));
-				request.getRequestDispatcher("./NewsArticle/EditNews.jsp").include(request, response);
-				request.getRequestDispatcher("/goHome.jsp").include(request, response);
-				break;
-			case "EditArticle":
-				BizLogic.editStory(Integer.parseInt(request.getParameter("articleID")), request.getParameter("newsTitle"),
-						request.getParameter("newsStory"), Boolean.parseBoolean(request.getParameter("isPublic")));
-				response.sendRedirect("./?msg=Updated%20" + request.getParameter("newsTitle"));
-				break;
-			case "createNewsStory":
-				BizLogic.createNewsStory(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStory"),
-						(String) request.getSession(false).getAttribute("user"), Boolean.parseBoolean((request.getParameter("isPublic")))));
-				response.sendRedirect("./");
-				break;
-			case "login":
-				this.loginUser(request, response);
-				break;
-			default:
-				response.sendError(Response.SC_BAD_REQUEST);
-				break;
+			response.addHeader("from", request.getRequestURI() + "?" + request.getQueryString());
+			response.sendRedirect("./?action=login");
 		}
+		else
+		{
+			switch (action)
+			{
+				case "newUser":
+					request.getRequestDispatcher("/Authentication/newUser.jsp").include(request, response);
+					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					break;
+				case "makeUser":
+					BizLogic.makeUser(request.getParameter("userID"), request.getParameter("role"));
+					request.getSession();
+					request.getSession(false).setAttribute("user", request.getParameter("userID"));
+					request.getSession(false).setAttribute("role", request.getParameter("role"));
+					response.sendRedirect("./");
+					break;
+				case "addComment":
+					BizLogic.addComment(Integer.parseInt(request.getParameter("articleID")), (String) request.getSession(false)
+							.getAttribute("user"), request.getParameter("comment"));
+					response.sendRedirect("?" + request.getParameter("from"));
+					break;
+				case "DeleteArticle":
+					request.setAttribute("msg", "News Article deleted:" + BizLogic.deleteArticle(request.getParameter("articleID")));
+					response.sendRedirect("./?msg=ARTICLE DELETED");
+					break;
+				case "favArticle":
+					BizLogic.addFavorite(request.getParameter("articleID"), this.getCookieMap(request), response);
+					response.sendRedirect("./");
+					break;
+				case "unFavArticle":
+					BizLogic.removeFavorite(Integer.parseInt(request.getParameter("articleID")), this.getCookieMap(request), response);
+					response.sendRedirect("./");
+					break;
+				case "EditArticleScreen":
+					request.setAttribute("article", BizLogic.getNewsItem(Integer.parseInt(request.getParameter("articleID"))));
+					request.getRequestDispatcher("./NewsArticle/EditNews.jsp").include(request, response);
+					request.getRequestDispatcher("/goHome.jsp").include(request, response);
+					break;
+				case "EditArticle":
+					BizLogic.editStory(Integer.parseInt(request.getParameter("articleID")), request.getParameter("newsTitle"),
+							request.getParameter("newsStory"), Boolean.parseBoolean(request.getParameter("isPublic")));
+					response.sendRedirect("./?msg=Updated%20" + request.getParameter("newsTitle"));
+					break;
+				case "createNewsStory":
+					BizLogic.createNewsStory(new NewsItemBean(request.getParameter("newsTitle"), request.getParameter("newsStory"),
+							(String) request.getSession(false).getAttribute("user"),
+							Boolean.parseBoolean((request.getParameter("isPublic")))));
+					response.sendRedirect("./");
+					break;
+				case "login":
+					this.loginUser(request, response);
+					break;
+				default:
+					response.sendError(Response.SC_BAD_REQUEST);
+					break;
+			}
+		}
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	private boolean isLoggedIN(HttpServletRequest request)
+	{
+
+		String currentUser= (String) request.getSession(false).getAttribute("user");
+		return !currentUser.equalsIgnoreCase("none");
 	}
 
 	/**
@@ -291,6 +306,61 @@ public class Controller extends HttpServlet
 			default:
 				response.sendError(Response.SC_BAD_REQUEST);
 				break;
+		}
+	}
+
+	/**
+	 * @param action
+	 * @return
+	 */
+	private boolean requiresLogin(String action)
+	{
+
+		switch (action)
+		{
+			case "createNewsStory":
+				return true;
+			case "addComment":
+				return true;
+			case "DeleteArticle":
+				return true;
+			case "EditArticleScreen":
+				return true;
+			case "EditArticle":
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * @param response
+	 * @param request
+	 * @throws IOException
+	 */
+	private void confirmAuthentication(HttpServletResponse response, HttpServletRequest request, String action) throws IOException
+	{
+
+		if (this.requiresLogin(action) && !this.isLoggedIN(request))
+		{
+			response.addHeader("from", request.getRequestURI() + "?" + request.getQueryString());
+			response.sendRedirect("./?action=login");
+		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	private void bounceBack(HttpServletRequest request, HttpServletResponse response) throws IOException
+	{
+
+		if (request.getHeader("from") != null && !request.getHeader("from").equalsIgnoreCase("go"))
+		{
+			String to= request.getHeader("from");
+			response.setHeader("from", "go");
+			response.sendRedirect(to);
 		}
 	}
 }

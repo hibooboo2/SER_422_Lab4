@@ -10,10 +10,10 @@
 %>
 
 <%
-	boolean isReporter= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter");
-	boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
-	boolean didWriteArticle= ((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase(article.getReporterId());
-	if ((article.isPublic() || isSubscriber) || (isReporter && didWriteArticle))
+	boolean canManageArticle= ((String) request.getAttribute("canManageArticle")).equalsIgnoreCase("true");
+	boolean canViewArticle= ((String) request.getAttribute("canViewArticle")).equalsIgnoreCase("true");
+
+	if (canViewArticle)
 	{
 %>
 <tr>
@@ -21,7 +21,7 @@
 		href="?action=viewArticle&articleID=<%=article.getItemId()%>"><%=article.getItemTitle()%></a></td>
 	<td>
 		<%
-			if (didWriteArticle && isReporter)
+			if (canManageArticle)
 				{
 		%>
 		<form method="post" action="./?action=DeleteArticle">

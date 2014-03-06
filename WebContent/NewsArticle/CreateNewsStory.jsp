@@ -8,7 +8,7 @@
 </head>
 <body>
 	<%
-		if(((String)(request.getSession(false).getAttribute("role"))).equalsIgnoreCase("Reporter")) {
+		if(((String)(request.getAttribute("canAuthorArticles"))).equalsIgnoreCase("true")) {
 	%>
 	<form action="./?action=createNewsStory" method="post">
 		Story Title: <input type="text" name="newsTitle" id="titleField"></input><br />

@@ -7,19 +7,18 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<%@ page import="edu.asupoly.ser422.lab4.dao.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%
 		//TODO Implement Favorite (Favorite Button)
 		NewsItemBean article= (NewsItemBean) request.getAttribute("article");
 	%>
 	<%
-		boolean isReporter= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Reporter");
-		boolean isSubscriber= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Subscriber");
-		boolean isArticleAuthor= ((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase(article.getReporterId());
-		boolean isGuest= ((String) request.getSession(false).getAttribute("role")).equalsIgnoreCase("Guest");
-		if ((article.isPublic() || isSubscriber) || (isReporter && isArticleAuthor))
+		if (request.getAttribute("canViewArticle") != null && request.getAttribute("canComment") != null)
 		{
+			boolean canViewArticle= ((String) request.getAttribute("canViewArticle")).equalsIgnoreCase("true");
+			boolean canComment= ((String) request.getAttribute("canComment")).equalsIgnoreCase("true");
+			if (canViewArticle)
+			{
 	%>
 	<h1><%=article.getItemTitle()%></h1>
 	<p>
@@ -34,19 +33,20 @@
 	%>
 	<%
 		for (int i= 0; i < article.getComments().length; i++)
-		{
-			request.setAttribute("comment", article.getComments()[i]);
+			{
+				request.setAttribute("comment", article.getComments()[i]);
 	%>
 	<jsp:include page="/Comments/view.jsp"></jsp:include>
 	<%
 		}
 	%>
 	<%
-		if (!isGuest || (isReporter && isArticleAuthor))
-		{
+		if (canComment)
+			{
 	%>
 	<jsp:include page="/Comments/add.jsp"></jsp:include>
 	<%
+		}
 		}
 	%>
 </body>
