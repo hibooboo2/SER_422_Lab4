@@ -10,7 +10,6 @@
 <body>
 	<%@ page import="edu.asupoly.ser422.lab4.dao.*"%>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
-	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
 	<%@ page import="java.util.Enumeration"%>
 	<%
 		Enumeration<String> attris= request.getSession().getAttributeNames();
@@ -28,6 +27,14 @@
 	<%="  "%>
 	<%
 		}
+		}
+	%>
+	<%
+		if (request.getParameter("msg") != null)
+		{
+	%>
+	<%=request.getParameter("msg")%>
+	<%
 		}
 	%>
 	<table>
