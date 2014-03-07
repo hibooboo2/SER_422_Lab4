@@ -1,25 +1,30 @@
 package edu.asupoly.ser422.lab4.model;
 
+import java.util.ArrayList;
+
 public class UserBean implements java.io.Serializable {
 	private static final long serialVersionUID = -1408433159918540612L;
 
 	public enum Role {
-	    GUEST, SUBSCRIBER, REPORTER;
-	    
-	    public String toString() {
-	    		switch(this) {
-	    			case GUEST: return "Guest";
-	    			case SUBSCRIBER: return "Subscriber";
-	    			case REPORTER: return "Reporter";
-	    			default: throw new IllegalArgumentException();
-	    		}
-	    }
+		GUEST, SUBSCRIBER, REPORTER;
+
+		@Override
+		public String toString() {
+			switch(this) {
+				case GUEST: return "Guest";
+				case SUBSCRIBER: return "Subscriber";
+				case REPORTER: return "Reporter";
+				default: throw new IllegalArgumentException();
+			}
+		}
 	}
-	
-	private String userId;
-	private String passwd;
-	private Role role;
-	
+
+	private final String userId;
+	private final String passwd;
+	private final Role role;
+
+	private final ArrayList<Integer>	favArticles	= new ArrayList<Integer>();
+
 	public UserBean(String id, String passwd, Role r) {
 		this.userId = id;
 		this.passwd = passwd;
@@ -30,26 +35,35 @@ public class UserBean implements java.io.Serializable {
 		this.passwd = user.passwd;
 		this.role = newRole;
 	}
-	
+
 	public String getUserId() {
-		return userId;
+		return this.userId;
 	}
 
 	public String getPasswd() {
-		return passwd;
+		return this.passwd;
 	}
-	
+
 	public Role getRole() {
-		return role;
+		return this.role;
 	}
-	
+
+	@Override
 	public String toString() {
-		return "User " + userId + " of Role " + role.toString();
+		return "User " + this.userId + " of Role " + this.role.toString();
 	}
-	
+
 	@Override
 	public Object clone() {
 		return new UserBean(this, this.role);
+	}
+	/**
+	 * @return the favArticles
+	 */
+	public ArrayList<Integer> getFavArticles()
+	{
+
+		return favArticles;
 	}
 
 }

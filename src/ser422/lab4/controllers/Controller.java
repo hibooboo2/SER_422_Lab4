@@ -84,7 +84,7 @@ public class Controller extends HttpServlet
 				}
 				else
 				{
-					response.sendRedirect("/Authentication/login.jsp");
+					request.getRequestDispatcher("/Authentication/login.jsp").include(request, response);
 				}
 				// response.sendRedirect("/Authentication/login.jsp?returnTO=viewArticle&articleID="
 				// + request.getParameter("articleID"));
@@ -101,7 +101,7 @@ public class Controller extends HttpServlet
 				boolean canAuthorArticle= BizLogic.canAuthorArticles(this.currentUserID(request));
 				if (canAuthorArticle)
 				{
-					request.getRequestDispatcher("./NewsArticle/CreateNewsStory.jsp").include(request, response);
+					request.getRequestDispatcher("/NewsArticle/CreateNewsStory.jsp").include(request, response);
 					this.userMenu(request, response);
 				}
 				else
@@ -119,12 +119,6 @@ public class Controller extends HttpServlet
 					request.getRequestDispatcher("home.jsp").include(request, response);
 					this.userMenu(request, response);
 					response.getWriter().println(NewsDAOFactory.getTheDAO().getClass().toString());
-					break;
-				}
-				else
-				{
-					response.getWriter().println("WHAT THE FUCK?");
-					this.userMenu(request, response);
 					break;
 				}
 			default:
@@ -178,11 +172,25 @@ public class Controller extends HttpServlet
 					response.sendRedirect("./?msg=ARTICLE DELETED");
 					break;
 				case "favArticle":
-					BizLogic.addFavorite(request.getParameter("articleID"), this.getCookieMap(request), response);
+					if (this.isLoggedIN(request))
+					{
+						BizLogic.addFavorite(Integer.parseInt(request.getParameter("articleID")), this.currentUserID(request), response);
+					}
+					else
+					{
+						BizLogic.addFavorite(Integer.parseInt(request.getParameter("articleID")), this.getCookieMap(request), response);
+					}
 					response.sendRedirect("./");
 					break;
 				case "unFavArticle":
-					BizLogic.removeFavorite(Integer.parseInt(request.getParameter("articleID")), this.getCookieMap(request), response);
+					if (this.isLoggedIN(request))
+					{
+						BizLogic.removeFavorite(Integer.parseInt(request.getParameter("articleID")), this.currentUserID(request), response);
+					}
+					else
+					{
+						BizLogic.removeFavorite(Integer.parseInt(request.getParameter("articleID")), this.getCookieMap(request), response);
+					}
 					response.sendRedirect("./");
 					break;
 				case "EditArticleScreen":
@@ -218,7 +226,7 @@ public class Controller extends HttpServlet
 	 */
 	private String currentUserID(HttpServletRequest request)
 	{
-	
+
 		return (String) request.getSession(false).getAttribute("user");
 	}
 
@@ -229,8 +237,7 @@ public class Controller extends HttpServlet
 	private boolean isLoggedIN(HttpServletRequest request)
 	{
 
-		String currentUser= (String) request.getSession(false).getAttribute("user");
-		return !currentUser.equalsIgnoreCase("none");
+		return (String) request.getSession(false).getAttribute("user") != null;
 	}
 
 	/**
@@ -274,7 +281,7 @@ public class Controller extends HttpServlet
 		{
 			request.getSession();
 			request.getSession().setAttribute("role", "Guest");
-			request.getSession().setAttribute("user", "none");
+			request.getSession().setAttribute("user", null);
 			request.getSession().setMaxInactiveInterval(1800);
 		}
 	}
@@ -334,6 +341,7 @@ public class Controller extends HttpServlet
 	 */
 	private void userMenu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
+
 		request.setAttribute("canAuthorArticles", String.valueOf(BizLogic.canAuthorArticles(this.currentUserID(request))));
 		request.getRequestDispatcher("/goHome.jsp").include(request, response);
 	}

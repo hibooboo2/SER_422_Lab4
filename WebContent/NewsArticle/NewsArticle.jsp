@@ -7,8 +7,8 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<jsp:include page="/header.jsp"></jsp:include>
 	<%@ page import="edu.asupoly.ser422.lab4.model.*"%>
+	<jsp:include page="/header.jsp"></jsp:include>
 	<%
 		NewsItemBean article= (NewsItemBean) request.getAttribute("article");
 	%>

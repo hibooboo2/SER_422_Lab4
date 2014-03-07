@@ -113,25 +113,26 @@ public class BizLogic
 	}
 
 	/**
-	 * @param newFav
+	 * @param articleID
 	 * @param cookieMap
 	 * @param response
 	 */
-	public static void addFavorite(String newFav, HashMap<String,String> cookieMap, HttpServletResponse response)
+	public static void addFavorite(int articleID, HashMap<String,String> cookieMap, HttpServletResponse response)
 	{
 
 		if (cookieMap.containsKey("favs"))
 		{
 			cookieMap.get("favs");
-			Cookie favsCookie= new Cookie("favs", cookieMap.get("favs") + ":" + newFav);
+			Cookie favsCookie= new Cookie("favs", cookieMap.get("favs") + ":" + articleID);
 			response.addCookie(favsCookie);
 		}
 		else
 		{
-			Cookie favsCookie= new Cookie("favs", newFav);
+			Cookie favsCookie= new Cookie("favs", "" + articleID);
 			response.addCookie(favsCookie);
 		}
 	}
+
 
 	/**
 	 * @param articleID
@@ -215,8 +216,7 @@ public class BizLogic
 		ArrayList<NewsItemBean> allArticles= new ArrayList<NewsItemBean>(Arrays.asList(theDAO.getNews()));
 		ArrayList<NewsItemBean> favArticles= new ArrayList<NewsItemBean>();
 		ArrayList<NewsItemBean> canManage= new ArrayList<NewsItemBean>();
-		ArrayList<Integer> favs= parseFavs(cookieMap.get("favs"));
-		UserBean currentUser= theDAO.getUser(userName);
+		ArrayList<Integer> favs= getFavs(userName, cookieMap);
 		ArrayList<NewsItemBean> cantView= new ArrayList<NewsItemBean>();
 		for (NewsItemBean article : allArticles)
 		{
@@ -245,6 +245,22 @@ public class BizLogic
 	}
 
 	/**
+	 * @param userName
+	 * @param cookieMap
+	 * @return
+	 */
+	private static ArrayList<Integer> getFavs(String userName, HashMap<String,String> cookieMap)
+	{
+		if (userName!=null) {
+			return parseFavs(cookieMap.get("favs"));
+		}
+		else {
+
+			return theDAO.getUser(userName).getFavArticles();
+		}
+	}
+
+	/**
 	 * @param string
 	 */
 	private static ArrayList<Integer> parseFavs(String favs)
@@ -269,7 +285,7 @@ public class BizLogic
 	public static boolean canViewArticle(String user, int articleID)
 	{
 
-		if (!user.equalsIgnoreCase("none"))
+		if (user != null)
 		{
 			boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
 			boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
@@ -302,7 +318,7 @@ public class BizLogic
 	public static boolean canComment(String user, int articleID)
 	{
 
-		if (!user.equalsIgnoreCase("none"))
+		if (user != null)
 		{
 			boolean isSubscriber= theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Subscriber");
 			boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
@@ -323,7 +339,7 @@ public class BizLogic
 	public static boolean canAuthorArticles(String user)
 	{
 
-		if (!user.equalsIgnoreCase("none"))
+		if (user != null)
 		{
 			return theDAO.getUser(user).getRole().toString().equalsIgnoreCase("Reporter");
 		}
@@ -336,7 +352,7 @@ public class BizLogic
 	public static boolean canManageArticle(String user, int articleID)
 	{
 
-		if (!user.equalsIgnoreCase("none"))
+		if (user != null)
 		{
 			boolean isReporter= ((theDAO.getUser(user).getRole().toString()).equalsIgnoreCase("Reporter"));
 			boolean isArticleAuthor= theDAO.getNewsItem(articleID).getReporterId().equalsIgnoreCase(user);
@@ -367,5 +383,27 @@ public class BizLogic
 			news[i]= new NewsItemBean(rand.getWords(3) + i, rand.getParagraphs() + i, "reporter", isPublic);
 			theDAO.createNewsItem(news[i]);
 		}
+	}
+
+	/**
+	 * @param articleID
+	 * @param currentUserID
+	 * @param response
+	 */
+	public static void addFavorite(int articleID, String currentUserID, HttpServletResponse response)
+	{
+
+		theDAO.getUser(currentUserID).getFavArticles().add(articleID);
+	}
+
+	/**
+	 * @param parseInt
+	 * @param currentUserID
+	 * @param response
+	 */
+	public static void removeFavorite(int articleID, String currentUserID, HttpServletResponse response)
+	{
+
+		theDAO.getUser(currentUserID).getFavArticles().remove((Integer) articleID);
 	}
 }
