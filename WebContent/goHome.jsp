@@ -15,13 +15,6 @@
 	width: 40px;
 }
 </style>
-<%
-	if (request.getSession(false) == null)
-	{
-		request.getSession();
-		request.getSession().setAttribute("user", "none");
-	}
-%>
 </head>
 <%
 	if (((String) request.getAttribute("canAuthorArticles")).equalsIgnoreCase("true"))
@@ -40,7 +33,7 @@
 		<tr>
 			<td><a href="./?action=news"><img src="http://goo.gl/Ac8kn9"
 					alt="Home Button" height="40" width="40"> </a> <%
- 	if (((String) request.getSession(false).getAttribute("user")).equalsIgnoreCase("none"))
+ 	if (((String) request.getSession(false).getAttribute("user"))==null)
  	{
  %> <a href="?action=login"><img
 					src="http://i.imgur.com/5INsaoH.png" alt="Login Button"> </a> <%

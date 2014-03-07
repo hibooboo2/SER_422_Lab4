@@ -251,7 +251,9 @@ public class BizLogic
 	 */
 	private static ArrayList<Integer> getFavs(String userName, HashMap<String,String> cookieMap)
 	{
-		if (userName!=null) {
+
+		if (userName == null)
+		{
 			return parseFavs(cookieMap.get("favs"));
 		}
 		else {
